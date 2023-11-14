@@ -15,8 +15,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import pl.com.coders.shop2.domain.Category;
 import pl.com.coders.shop2.domain.Product;
-import pl.com.coders.shop2.domain.ProductDto;
 import pl.com.coders.shop2.repository.ProductRepository;
 import pl.com.coders.shop2.service.ProductService;
 
@@ -24,10 +24,7 @@ import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -48,27 +45,26 @@ class ProductControllerTest {
 
     @MockBean
     private ProductRepository productRepository;
+    private Category category;
+    private Product product;
 
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
+        category = createSampleCategory();
+        product = createSampleProduct(category);
+        when(productService.create(product)).thenReturn(product);
     }
 
     @Test
     void create() throws Exception {
-        // Given
-        Product product = createSampleProduct();
-        when(productService.create(any(Product.class))).thenReturn(product);
-
-        // When
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post("/product")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(product)))
                 .andExpect(status().isOk())
                 .andReturn();
 
-        // Then
         String responseContent = result.getResponse().getContentAsString();
         Product responseProduct = objectMapper.readValue(responseContent, Product.class);
 
@@ -77,68 +73,55 @@ class ProductControllerTest {
 
     @Test
     void get() throws Exception {
-        // Given
-        Product product = createSampleProduct();
-        when(productService.get(anyLong())).thenReturn(product);
+        Long productId = 1L;
+        when(productService.get((productId))).thenReturn(product);
 
-        // When
-        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/product/1"))
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/product/{id}", productId))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andReturn();
-
-        // Then
         String json = result.getResponse().getContentAsString();
         Product responseProduct = objectMapper.readValue(json, Product.class);
         assertEquals(product, responseProduct);
     }
 
+
     @Test
     void delete() throws Exception {
-        // Given
-        Product product = createSampleProduct();
-        when(productService.get(anyLong())).thenReturn(product);
         long productId = 1L;
         when(productService.delete(productId)).thenReturn(true);
 
-        // When
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.delete("/product")
                         .param("id", String.valueOf(productId))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
 
-        // Then
         String responseContent = mvcResult.getResponse().getContentAsString();
         assertNotNull(mvcResult);
     }
 
     @Test
     void update() throws Exception {
-        // Given
-        Product existingProduct = createSampleProduct();
-        when(productService.update(any(Product.class), anyLong())).thenReturn(existingProduct);
+        Long productId = 1L;
+        Product updatedProduct = createSampleProduct(category);
+        String json = objectMapper.writeValueAsString(updatedProduct);
 
-        // When
-        ProductDto updatedProductDto = createSampleProductDto();
-        String json = objectMapper.writeValueAsString(updatedProductDto);
+        when(productService.update(updatedProduct, productId)).thenReturn(updatedProduct);
 
-        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.put("/product/1")
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.put("/product/{id}", productId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json)
-                )
-                .andDo(print())
+                        .content(objectMapper.writeValueAsString(product)))
                 .andExpect(status().isOk())
                 .andReturn();
 
-        // Then
         String responseContent = result.getResponse().getContentAsString();
         Product responseProduct = objectMapper.readValue(responseContent, Product.class);
-        assertEquals(existingProduct, responseProduct);
+        assertEquals(updatedProduct, responseProduct);
     }
 
 
-    private Product createSampleProduct() {
+    private Product createSampleProduct(Category category) {
         return Product.builder()
                 .name("Sample Product")
                 .description("Sample Description")
@@ -147,12 +130,9 @@ class ProductControllerTest {
                 .build();
     }
 
-    private ProductDto createSampleProductDto() {
-        return ProductDto.builder()
-                .name("Sample Product")
-                .description("Sample Description")
-                .price(BigDecimal.valueOf(19.99))
-                .quantity(10)
+    private Category createSampleCategory() {
+        return Category.builder()
+                .name("Books")
                 .build();
     }
 }

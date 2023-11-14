@@ -1,10 +1,36 @@
+#server:
+#  port: 8081
+#spring:
+#  datasource:
+#    username: xhynpxlcgdusvs
+#    password: 746bc84001cbee024e1f54e5dda092ac7b994bc4bf402cdb9076f25652c8cebc
+#    url: jdbc:postgresql://ec2-54-171-193-12.eu-west-1.compute.amazonaws.com:5432/d8ma33m72anskp?currentSchema=libria
+#    hikari:
+#      maximum-pool-size: 100
+#  jpa:
+#    open-in-view: 'false'
+#    show-sql: 'true'
+#    properties:
+#      hibernate:
+#        dialect: org.hibernate.dialect.PostgreSQL92Dialect
+#    hibernate:
+#      ddl-auto: update
+#  mvc:
+#    pathmatch:
+#      matching-strategy: ANT_PATH_MATCHER
+#  sql:
+#    init:
+#      mode: always
+#
+#
+
 server:
   port: 8080
 spring:
   datasource:
-    username: xhynpxlcgdusvs
-    password: 746bc84001cbee024e1f54e5dda092ac7b994bc4bf402cdb9076f25652c8cebc
-    url: jdbc:postgresql://ec2-54-171-193-12.eu-west-1.compute.amazonaws.com:5432/d8ma33m72anskp?currentSchema=libria
+    username: postgres
+    password: 666666
+    url: jdbc:postgresql://localhost:5432/shop
   jpa:
     open-in-view: 'false'
     show-sql: 'true'
@@ -12,12 +38,10 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQL92Dialect
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
   mvc:
     pathmatch:
       matching-strategy: ANT_PATH_MATCHER
   sql:
     init:
       mode: always
-
-

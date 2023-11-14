@@ -2,11 +2,11 @@ package pl.com.coders.shop2.repository;
 
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import pl.com.coders.shop2.domain.Category;
 import pl.com.coders.shop2.domain.Product;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -14,41 +14,47 @@ public class ProductRepository {
     @PersistenceContext
     private EntityManager entityManager;
 
-    @Transactional
-    public Product add(Product product) {
-        product.setCreated(LocalDateTime.now());
-        product.setUpdated(LocalDateTime.now());
-        entityManager.persist(product);
-        return product;
+    public ProductRepository(EntityManager entityManager) {
+        this.entityManager = entityManager;
     }
 
-    public Product get(Long id) {
+    @Transactional
+    public Product add(Product product) {
+        return entityManager.merge(product);
+    }
+
+    public Product getProductById(Long id) {
         return entityManager.find(Product.class, id);
+    }
+
+    public List<Product> getProductsByCategory(Category category) {
+        String jpql = "SELECT p FROM Product p WHERE p.category = :category";
+        return entityManager.createQuery(jpql, Product.class)
+                .setParameter("category", category)
+                .getResultList();
     }
 
     @Transactional
     public boolean delete(Long id) {
-        Product toDeleteProduct = get(id);
-        entityManager.remove(toDeleteProduct);
+        Product product = entityManager.find(Product.class, id);
+        entityManager.remove(product);
         return true;
     }
 
+
     @Transactional
-    public Product update(Product product, Long id) {
-        Product old = get(id);
-
-        old.setName(product.getName());
-        old.setDescription(product.getDescription());
-        old.setPrice(product.getPrice());
-        old.setQuantity(product.getQuantity());
-        old.setUpdated(LocalDateTime.now());
-        entityManager.merge(old);
-
-        return old;
+    public Product update(Product product) {
+        entityManager.merge(product);
+        return product;
     }
 
     public List<Product> findAll() {
         return entityManager.createQuery("SELECT p FROM Product p", Product.class).getResultList();
     }
-}
 
+    @Transactional
+    public void deleteAll() {
+        entityManager.createQuery("DELETE FROM Product").executeUpdate();
+    }
+
+}

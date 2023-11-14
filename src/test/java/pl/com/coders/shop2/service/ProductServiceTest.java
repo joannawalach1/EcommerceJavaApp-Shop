@@ -4,8 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import pl.com.coders.shop2.domain.Category;
 import pl.com.coders.shop2.domain.Product;
 import pl.com.coders.shop2.repository.ProductRepository;
 
@@ -14,90 +14,75 @@ import java.math.BigDecimal;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@DataJpaTest
+@SpringBootTest
 class ProductServiceTest {
 
     @Mock
     private ProductRepository productRepository;
+
     @InjectMocks
     private ProductService productService;
 
+    private Category category;
+    private Product inputProduct;
+    private Long categoryId;
+
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+        category = createSampleCategory();
+        inputProduct = createSampleProduct(category);
+        categoryId = category.getId();
     }
 
     @Test
     void create() {
-        // Given
-        Product inputProduct = createSampleProduct();
         when(productRepository.add(inputProduct)).thenReturn(inputProduct);
-
-        // When
         Product createdProduct = productService.create(inputProduct);
-
-        // Then
         assertNotNull(createdProduct);
-        assertSame(inputProduct, createdProduct);
-        verify(productRepository, times(1)).add(inputProduct);
     }
 
     @Test
     void get() {
-        // Given
-        Product product = createSampleProduct();
-        when(productRepository.add(product)).thenReturn(product);
-        Product addedProduct = productRepository.add(product);
-        when(productRepository.get(addedProduct.getId())).thenReturn(product);
-
-        // When
-        Product resultProduct = productService.get(addedProduct.getId());
-
-        // Then
+        when(productRepository.getProductById(inputProduct.getId())).thenReturn(inputProduct);
+        Product resultProduct = productService.get(inputProduct.getId());
         assertNotNull(resultProduct);
-        assertSame(addedProduct, resultProduct);
-        verify(productRepository, times(1)).add(addedProduct);
+        assertSame(inputProduct, resultProduct);
+        verify(productRepository, times(1)).getProductById(inputProduct.getId());
     }
 
     @Test
     void delete() {
-        // Given
-        Product product = createSampleProduct();
-        when(productRepository.add(product)).thenReturn(product);
-        Product addedProduct = productRepository.add(product);
-        when(productRepository.get(addedProduct.getId())).thenReturn(addedProduct);
-        when(productRepository.delete(product.getId())).thenReturn(true);
-
-        //When
-        boolean resultProduct = productService.delete(addedProduct.getId());
-
-        //Then
+        when(productRepository.delete(inputProduct.getId())).thenReturn(true);
+        boolean resultProduct = productService.delete(inputProduct.getId());
         assertTrue(resultProduct);
-        verify(productRepository, times(1)).add(product);
-        verify(productRepository, times(1)).delete(addedProduct.getId());
+        verify(productRepository, times(1)).delete(inputProduct.getId());
     }
 
     @Test
     void update() {
-        Product inputProduct = createSampleProduct();
-        when(productRepository.add(inputProduct)).thenReturn(inputProduct);
+        Long productId = inputProduct.getId();
+        when(productRepository.update(inputProduct)).thenReturn(inputProduct);
+        Product updatedProduct = productService.update(inputProduct, productId);
 
-        // When
-        Product createdProduct = productService.create(inputProduct);
-
-        // Then
-        assertNotNull(createdProduct);
-        assertSame(inputProduct, createdProduct);
-        verify(productRepository, times(1)).add(inputProduct);
+        assertNotNull(updatedProduct);
+        assertSame(inputProduct, updatedProduct);
+        verify(productRepository, times(1)).update(inputProduct);
     }
 
 
-    private Product createSampleProduct() {
+    private Product createSampleProduct(Category category) {
         return Product.builder()
+                .category(category)
                 .name("Sample Product")
                 .description("Sample Description")
                 .price(BigDecimal.valueOf(19.99))
                 .quantity(10)
+                .build();
+    }
+
+    private Category createSampleCategory() {
+        return Category.builder()
+                .name("Books")
                 .build();
     }
 }
