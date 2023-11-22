@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.com.coders.shop2.domain.Product;
+import pl.com.coders.shop2.domain.ProductDto;
 import pl.com.coders.shop2.service.ProductService;
 
 import java.util.List;
@@ -19,15 +20,15 @@ public class ProductController {
     }
 
     @PostMapping
-    public ResponseEntity<Product> create(@RequestBody Product product) {
-        Product createdProduct = productService.create(product);
+    public ResponseEntity<ProductDto> create(@RequestBody ProductDto productDto) {
+        ProductDto createdProduct = productService.create(productDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdProduct);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Product> get(@PathVariable Long id) {
-        Product product = productService.get(id);
-        return ResponseEntity.ok(product);
+    public ResponseEntity<ProductDto> get(@PathVariable Long id) {
+        ProductDto productDto = productService.get(id);
+        return ResponseEntity.ok(productDto);
     }
 
     @DeleteMapping("/{id}")
@@ -37,14 +38,20 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Product> update(@RequestBody Product product, @PathVariable Long id) {
-        Product updatedProduct = productService.update(product, id);
+    public ResponseEntity<ProductDto> update(@RequestBody ProductDto productDto, @PathVariable Long id) {
+        ProductDto updatedProduct = productService.update(productDto, id);
         return ResponseEntity.ok(updatedProduct);
     }
 
-    @GetMapping
-    public ResponseEntity<List<Product>> getAllProducts() {
-        List<Product> productList = productService.getAll();
+    @GetMapping("/getProductDto")
+    public ResponseEntity<List<Product>> getAllProd() {
+        List<Product> productList = productService.getAllProd();
+        return ResponseEntity.ok(productList);
+    }
+
+    @GetMapping("/getProduct")
+    public ResponseEntity<List<ProductDto>> getAll() {
+        List<ProductDto> productList = productService.getAll();
         return ResponseEntity.ok(productList);
     }
 }

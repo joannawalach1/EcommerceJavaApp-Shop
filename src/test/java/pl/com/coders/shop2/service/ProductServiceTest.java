@@ -5,8 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
-import pl.com.coders.shop2.domain.Category;
-import pl.com.coders.shop2.domain.Product;
+import pl.com.coders.shop2.domain.*;
 import pl.com.coders.shop2.repository.ProductRepository;
 
 import java.math.BigDecimal;
@@ -23,55 +22,58 @@ class ProductServiceTest {
     @InjectMocks
     private ProductService productService;
 
-    private Category category;
-    private Product inputProduct;
-    private Long categoryId;
+    private CategoryDto categoryDto;
+
+    private CategoryType categoryType;
+    private ProductDto inputProductDto;
+    private String categoryId;
 
     @BeforeEach
     void setUp() {
-        category = createSampleCategory();
-        inputProduct = createSampleProduct(category);
-        categoryId = category.getId();
+        CategoryDto categoryDto1 = new CategoryDto();
+        categoryType = CategoryType.MOTORYZACJA;
+        inputProductDto = createSampleDtoProduct(categoryType);
+        categoryId = categoryDto.getTitle();
     }
 
     @Test
     void create() {
-        when(productRepository.add(any())).thenReturn(inputProduct);
-        Product createdProduct = productService.create(inputProduct);
+        when(productRepository.add(any())).thenReturn(inputProductDto);
+        ProductDto createdProduct = productService.create(inputProductDto);
         assertNotNull(createdProduct);
     }
 
     @Test
     void get() {
-        when(productRepository.getProductById(any())).thenReturn(inputProduct);
-        Product resultProduct = productService.get(inputProduct.getId());
+        when(productRepository.getProductById(any())).thenReturn(inputProductDto);
+        ProductDto resultProduct = productService.get(inputProductDto.getId());
         assertNotNull(resultProduct);
-        assertSame(inputProduct, resultProduct);
-        verify(productRepository, times(1)).getProductById(inputProduct.getId());
+        assertSame(inputProductDto, resultProduct);
+        verify(productRepository, times(1)).getProductById(inputProductDto.getId());
     }
 
     @Test
     void delete() {
-        when(productRepository.delete(inputProduct.getId())).thenReturn(true);
-        boolean resultProduct = productService.delete(inputProduct.getId());
+        when(productRepository.delete(inputProductDto.getId())).thenReturn(true);
+        boolean resultProduct = productService.delete(inputProductDto.getId());
         assertTrue(resultProduct);
-        verify(productRepository, times(1)).delete(inputProduct.getId());
+        verify(productRepository, times(1)).delete(inputProductDto.getId());
     }
 
     @Test
     void update() {
-        Long productId = inputProduct.getId();
-        when(productRepository.update(inputProduct)).thenReturn(inputProduct);
-        Product updatedProduct = productService.update(inputProduct, productId);
+        Long productId = inputProductDto.getId();
+        when(productRepository.update(inputProductDto)).thenReturn(inputProductDto);
+        ProductDto updatedProduct = productService.update(inputProductDto, productId);
 
         assertNotNull(updatedProduct);
-        assertSame(inputProduct, updatedProduct);
-        verify(productRepository, times(1)).update(inputProduct);
+        assertSame(inputProductDto, updatedProduct);
+        verify(productRepository, times(1)).update(inputProductDto);
     }
 
-    private Product createSampleProduct(Category category) {
-        return Product.builder()
-                .category(category)
+    private ProductDto createSampleDtoProduct(CategoryType categoryType) {
+        return ProductDto.builder()
+                .categoryType(categoryType)
                 .name("Sample Product")
                 .description("Sample Description")
                 .price(BigDecimal.valueOf(19.99))
@@ -79,9 +81,9 @@ class ProductServiceTest {
                 .build();
     }
 
-    private Category createSampleCategory() {
-        return Category.builder()
-                .name("Books")
+    private CategoryDto createSampleDtoCategory() {
+        return CategoryDto.builder()
+                .title("Books")
                 .build();
     }
 }

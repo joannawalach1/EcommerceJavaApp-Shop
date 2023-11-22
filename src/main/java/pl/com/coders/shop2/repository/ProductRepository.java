@@ -4,9 +4,9 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import pl.com.coders.shop2.domain.Category;
 import pl.com.coders.shop2.domain.Product;
+import pl.com.coders.shop2.domain.ProductDto;
 import pl.com.coders.shop2.exceptions.ProductWithGivenIdNotExistsException;
 import pl.com.coders.shop2.exceptions.ProductWithGivenTitleExistsException;
-import pl.com.coders.shop2.exceptions.ProductWithGivenTitleNotExistsException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -25,19 +25,19 @@ public class ProductRepository {
     }
 
     @Transactional
-    public Product add(Product product) throws ProductWithGivenTitleExistsException {
+    public ProductDto add(ProductDto product) throws ProductWithGivenTitleExistsException {
         if (getProductByName(product.getName()).isPresent()) {
             throw new ProductWithGivenTitleExistsException("message");
         }
         return entityManager.merge(product);
     }
 
-    public Product getProductById(Long id) throws ProductWithGivenIdNotExistsException {
-        Product product = entityManager.find(Product.class, id);
-        if (product == null) {
+    public ProductDto getProductById(Long id) throws ProductWithGivenIdNotExistsException {
+        ProductDto productDto = entityManager.find(ProductDto.class, id);
+        if (productDto == null) {
             throw new ProductWithGivenIdNotExistsException("Product with the given Id " + id + " doesn't exist");
         }
-        return product;
+        return productDto;
     }
 
 
@@ -61,7 +61,7 @@ public class ProductRepository {
 
 
     @Transactional
-    public Product update(Product product) throws ProductWithGivenIdNotExistsException {
+    public ProductDto update(ProductDto product) throws ProductWithGivenIdNotExistsException {
         if (product.getId() == null || entityManager.find(Product.class, product.getId()) == null) {
             throw new ProductWithGivenIdNotExistsException("Product with the given ID does not exist.");
         }
@@ -69,7 +69,13 @@ public class ProductRepository {
     }
 
     @Transactional
-    public List<Product> findAll() {
+    public List<ProductDto> findAll() {
+        return entityManager.createQuery("SELECT p FROM ProductDto p", ProductDto.class)
+                .getResultList();
+    }
+
+    @Transactional
+    public List<Product> findAllProd() {
         return entityManager.createQuery("SELECT p FROM Product p", Product.class)
                 .getResultList();
     }
