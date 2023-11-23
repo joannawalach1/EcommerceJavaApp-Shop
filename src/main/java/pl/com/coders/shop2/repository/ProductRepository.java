@@ -24,19 +24,19 @@ public class ProductRepository {
     }
 
     @Transactional(rollbackFor = ProductWithGivenTitleExistsException.class)
-    public ProductDto add(ProductDto productDto) throws ProductWithGivenTitleExistsException {
-        if (getProductByName(productDto.getName()).isPresent()) {
+    public Product add(Product product) throws ProductWithGivenTitleExistsException {
+        if (getProductByName(product.getName()).isPresent()) {
             throw new ProductWithGivenTitleExistsException("Product with the given title already exists.");
         }
-        return entityManager.merge(productDto);
+        return entityManager.merge(product);
     }
 
-    public ProductDto getProductById(Long id) throws ProductWithGivenIdNotExistsException {
-        ProductDto productDto = entityManager.find(ProductDto.class, id);
-        if (productDto == null) {
+    public Product getProductById(Long id) throws ProductWithGivenIdNotExistsException {
+        Product product = entityManager.find(Product.class, id);
+        if (product == null) {
             throw new ProductWithGivenIdNotExistsException("Product with the given Id " + id + " doesn't exist");
         }
-        return productDto;
+        return product;
     }
 
 
@@ -60,11 +60,11 @@ public class ProductRepository {
 
 
     @Transactional
-    public ProductDto update(ProductDto productDto) throws ProductWithGivenIdNotExistsException {
-        if (productDto.getId() == null || entityManager.find(ProductDto.class, productDto.getId()) == null) {
+    public Product update(Product product, Long id) throws ProductWithGivenIdNotExistsException {
+        if (product.getId() == null || entityManager.find(Product.class, product.getId()) == null) {
             throw new ProductWithGivenIdNotExistsException("Product with the given ID does not exist.");
         }
-        return entityManager.merge(productDto);
+        return entityManager.merge(product);
     }
 
     @Transactional

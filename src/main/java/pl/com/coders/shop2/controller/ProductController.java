@@ -22,7 +22,7 @@ public class ProductController {
     @PostMapping
     public ResponseEntity<ProductDto> create(@RequestBody ProductDto productDto) {
         ProductDto createdProduct = productService.create(productDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdProduct);
+        return ResponseEntity.status(HttpStatus.OK).body(createdProduct);
     }
 
     @GetMapping("/{id}")

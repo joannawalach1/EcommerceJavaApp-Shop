@@ -27,7 +27,7 @@ class ProductRepositoryTest {
     @Autowired
     private CategoryRepository categoryRepository;
 
-    private ProductDto product;
+    private Product product;
     private Category category;
 
     private CategoryType categoryType;
@@ -36,14 +36,22 @@ class ProductRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        categoryType = categoryType.ELEKTRONIKA;
-        product = createSampleProduct(categoryType);
+        category = createSampleCategory();
+        Category save = categoryRepository.save(category);
+        product = createSampleProduct(category);
     }
 
     @Test
     void shouldAddProductToRepositoryAndGenerateId() {
         assertThat(product).isNotNull();
         assertThat(product.getName()).isNotNull();
+    }
+
+    @Test
+    void shouldGetProductFromRepositoryById() {
+        Product add = productRepository.add(product);
+        Product productById = productRepository.getProductById(add.getId());
+        assertEquals(add.getId(), productById.getId());
     }
 
     @Test
@@ -82,7 +90,7 @@ class ProductRepositoryTest {
     @Test
     void shouldFindAllProductsInRepository() {
         List<Product> allProducts = productRepository.findAllProd();
-        assertEquals(10, allProducts.size());
+        assertEquals(11, allProducts.size());
     }
 
 //    @Test
@@ -102,14 +110,21 @@ class ProductRepositoryTest {
         assertEquals("Product with the given Id 1200 doesn't exist", exception.getMessage());
     }
 
-    private ProductDto createSampleProduct(CategoryType categoryType) {
-        return ProductDto.builder()
+    private Product createSampleProduct(Category category) {
+        return Product.builder()
                 .name("Sample Product")
                 .description("Sample Description")
                 .price(BigDecimal.valueOf(19.99))
                 .quantity(10)
-                .categoryType(categoryType)
+                .category(category)
                 .build();
     }
-}
+
+    private Category createSampleCategory() {
+        return Category.builder()
+                .name("Books")
+                .build();
+    }
+
+    }
 
