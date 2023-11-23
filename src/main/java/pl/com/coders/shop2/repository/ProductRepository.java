@@ -16,7 +16,6 @@ import java.util.Optional;
 
 @Repository
 public class ProductRepository {
-    private List<Product> products;
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -24,12 +23,12 @@ public class ProductRepository {
         this.entityManager = entityManager;
     }
 
-    @Transactional
-    public ProductDto add(ProductDto product) throws ProductWithGivenTitleExistsException {
-        if (getProductByName(product.getName()).isPresent()) {
-            throw new ProductWithGivenTitleExistsException("message");
+    @Transactional(rollbackFor = ProductWithGivenTitleExistsException.class)
+    public ProductDto add(ProductDto productDto) throws ProductWithGivenTitleExistsException {
+        if (getProductByName(productDto.getName()).isPresent()) {
+            throw new ProductWithGivenTitleExistsException("Product with the given title already exists.");
         }
-        return entityManager.merge(product);
+        return entityManager.merge(productDto);
     }
 
     public ProductDto getProductById(Long id) throws ProductWithGivenIdNotExistsException {
@@ -61,11 +60,11 @@ public class ProductRepository {
 
 
     @Transactional
-    public ProductDto update(ProductDto product) throws ProductWithGivenIdNotExistsException {
-        if (product.getId() == null || entityManager.find(Product.class, product.getId()) == null) {
+    public ProductDto update(ProductDto productDto) throws ProductWithGivenIdNotExistsException {
+        if (productDto.getId() == null || entityManager.find(ProductDto.class, productDto.getId()) == null) {
             throw new ProductWithGivenIdNotExistsException("Product with the given ID does not exist.");
         }
-        return entityManager.merge(product);
+        return entityManager.merge(productDto);
     }
 
     @Transactional
@@ -89,7 +88,6 @@ public class ProductRepository {
         String jpql = "SELECT p FROM Product p WHERE p.name = :name";
         TypedQuery<Product> query = entityManager.createQuery(jpql, Product.class)
                 .setParameter("name", name);
-        Optional<Product> first = query.getResultStream().findFirst();
-        return first;
+        return query.getResultStream().findFirst();
     }
 }

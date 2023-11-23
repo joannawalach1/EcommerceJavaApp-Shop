@@ -30,7 +30,7 @@ class ProductServiceTest {
 
     @BeforeEach
     void setUp() {
-        CategoryDto categoryDto1 = new CategoryDto();
+        this.categoryDto = new CategoryDto();
         categoryType = CategoryType.MOTORYZACJA;
         inputProductDto = createSampleDtoProduct(categoryType);
         categoryId = categoryDto.getTitle();

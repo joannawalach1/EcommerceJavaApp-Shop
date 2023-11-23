@@ -23,8 +23,12 @@ import pl.com.coders.shop2.service.ProductService;
 
 import java.math.BigDecimal;
 
+import static net.bytebuddy.matcher.ElementMatchers.is;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
@@ -46,17 +50,18 @@ class ProductControllerTest {
     @MockBean
     private ProductService productService;
 
-    private String category;
+    private Category category;
     private CategoryType categoryType;
-    private Product product;
     private ProductDto productDto;
+    private Product product;
 
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
-        category = CategoryType.ELEKTRONIKA.name();
-        product = createSampleProduct(category);
+        categoryType = CategoryType.ELEKTRONIKA;
+        category = createSampleCategory();
+        productDto = createSampleDtoProduct(categoryType);
         when(productService.create(productDto)).thenReturn(productDto);
     }
 
@@ -65,16 +70,17 @@ class ProductControllerTest {
         when(productService.create(any())).thenReturn(productDto);
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post("/product")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(product)))
+                        .content(objectMapper.writeValueAsString(productDto)))
                 .andExpect(status().isCreated())
                 .andReturn();
 
         String responseContent = result.getResponse().getContentAsString();
-        Product responseProduct = objectMapper.readValue(responseContent, Product.class);
+        ProductDto responseProduct = objectMapper.readValue(responseContent, ProductDto.class);
 
-        assertEquals(product, responseProduct);
+        assertEquals(productDto.getName(), responseProduct.getName());
         verify(productService, times(1)).create(any());
     }
+
 
     @Test
     void get() throws Exception {
@@ -85,10 +91,13 @@ class ProductControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andReturn();
-        String json = result.getResponse().getContentAsString();
-        Product responseProduct = objectMapper.readValue(json, Product.class);
-        assertEquals(product, responseProduct);
+
+        String jsonResponse = result.getResponse().getContentAsString();
+        ProductDto responseProduct = objectMapper.readValue(jsonResponse, ProductDto.class);
+        assertEquals(productDto.getId(), responseProduct.getId());
+        verify(productService, times(1)).get(any());
     }
+
 
     @Test
     void delete() throws Exception {
@@ -102,27 +111,41 @@ class ProductControllerTest {
         verify(productService, times(1)).delete(productId);
     }
 
-//    @Test
-//    void update() throws Exception {
-//        Long productId = 1L;
-//        ProductDto updatedProduct = createSampleProduct(categoryType.);
-//        String json = objectMapper.writeValueAsString(updatedProduct);
-//
-//        when(productService.update(updatedProduct, productId)).thenReturn(updatedProduct);
-//
-//        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.put("/product/{id}", productId)
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(json))
-//                .andExpect(status().isOk())
-//                .andReturn();
-//
-//        String responseContent = result.getResponse().getContentAsString();
-//        Product responseProduct = objectMapper.readValue(responseContent, Product.class);
-//        assertEquals(updatedProduct, responseProduct);
-//    }
+    @Test
+    void update() throws Exception {
+            Long productId = 1L;
+            ProductDto updatedProduct = createSampleDtoProduct(categoryType);
+            String json = objectMapper.writeValueAsString(updatedProduct);
 
-    private Product createSampleProduct(String category) {
+            when(productService.update(any(), eq(productId))).thenReturn(updatedProduct);
+
+            MvcResult result = mockMvc.perform(MockMvcRequestBuilders.put("/product/{id}", productId)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(json))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andReturn();
+
+            String responseContent = result.getResponse().getContentAsString();
+            ProductDto responseProduct = objectMapper.readValue(responseContent, ProductDto.class);
+
+        assertEquals(productDto.getName(), responseProduct.getName());
+        verify(productService, times(1)).update(any(), any());
+         }
+
+    private ProductDto createSampleDtoProduct(CategoryType categoryType) {
+        return ProductDto.builder()
+                .name("Sample Product")
+                .description("Sample Description")
+                .price(BigDecimal.valueOf(19.99))
+                .quantity(10)
+                .categoryType(categoryType)
+                .build();
+    }
+
+    private Product createSampleProduct(Category category) {
         return Product.builder()
+                .category(category)
                 .name("Sample Product")
                 .description("Sample Description")
                 .price(BigDecimal.valueOf(19.99))
@@ -130,13 +153,9 @@ class ProductControllerTest {
                 .build();
     }
 
-    private ProductDto createSampleDtoProduct() {
-        return ProductDto.builder()
-                .categoryType(categoryType)
-                .name("Sample Product")
-                .description("Sample Description")
-                .price(BigDecimal.valueOf(19.99))
-                .quantity(10)
+    private Category createSampleCategory() {
+        return Category.builder()
+                .name("Sample Category")
                 .build();
     }
 }
