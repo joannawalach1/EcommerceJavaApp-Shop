@@ -16,14 +16,14 @@ import java.time.LocalDateTime;
 @Builder
 @EqualsAndHashCode(of = {"id"})
 
-
+@Table(name = "PRODUCT")
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @ManyToOne()
     @JoinColumn(name = "category_id")
-//    @JsonIgnore
+    //@JsonIgnore
     private Category category;
     private String name;
     private String description;

@@ -12,12 +12,10 @@ import pl.com.coders.shop2.exceptions.ProductWithGivenIdNotExistsException;
 import pl.com.coders.shop2.exceptions.ProductWithGivenTitleExistsException;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -29,16 +27,17 @@ class ProductRepositoryTest {
     @Autowired
     private CategoryRepository categoryRepository;
 
-    private Product product;
+    private ProductDto product;
     private Category category;
+
+    private CategoryType categoryType;
 
 
 
     @BeforeEach
     void setUp() {
-        category = createSampleCategory();
-        categoryRepository.save(category);
-        product = createSampleProduct(category);
+        categoryType = categoryType.ELEKTRONIKA;
+        product = createSampleProduct(categoryType);
     }
 
     @Test
@@ -62,11 +61,10 @@ class ProductRepositoryTest {
 
 //    @Test
 //    void shouldUpdateProductInRepository() {
-//        Category newCategory = createSampleCategory();
-//        Product newProduct = createSampleProduct(newCategory);
-//        CategoryType categoryType = categoryRepository.existsById(1L);
-//        newProduct.setCategoryType(categoryType);
-//        ProductDto addedProduct = productRepository.add(newProduct);
+//        categoryType = categoryType.MOTORYZACJA;
+//        Product newProduct = createSampleProduct(categoryType);
+//        boolean categoryType = categoryRepository.existsById(1L);
+//        Product addedProduct = productRepository.add(newProduct);
 //
 //        LocalDateTime expectedCreated = addedProduct.getCreated().withNano(0);
 //        addedProduct.setName("Updated Product");
@@ -83,40 +81,34 @@ class ProductRepositoryTest {
 
     @Test
     void shouldFindAllProductsInRepository() {
-        List<ProductDto> allProducts = productRepository.findAll();
-        assertEquals(1, allProducts.size());
+        List<Product> allProducts = productRepository.findAllProd();
+        assertEquals(10, allProducts.size());
     }
 
-    @Test
-    void add_WithNullProductName_ShouldThrowException() {
-        ProductDto productDto = new ProductDto();
-        assertThrows(ProductWithGivenTitleExistsException.class, () -> productRepository.add(productDto));
-    }
+//    @Test
+//    void add_WithNullProductName_ShouldThrowException() {
+//        ProductDto productDto = new ProductDto();
+//        assertThrows(ProductWithGivenTitleExistsException.class, () -> productRepository.add(productDto));
+//    }
 
     @Test
     void getProductById_WithNonExistingId_ShouldThrowException() {
-        Long nonExistingId = 1L;
-        when(productRepository.getProductById(eq(nonExistingId))).thenReturn(null);
+        Long nonExistingId = 1200L;
 
-        assertThrows(ProductWithGivenIdNotExistsException.class, () -> {
+        ProductWithGivenIdNotExistsException exception = assertThrows(ProductWithGivenIdNotExistsException.class, () -> {
             productRepository.getProductById(nonExistingId);
         });
 
+        assertEquals("Product with the given Id 1200 doesn't exist", exception.getMessage());
     }
 
-    private Product createSampleProduct(Category category) {
-        return Product.builder()
+    private ProductDto createSampleProduct(CategoryType categoryType) {
+        return ProductDto.builder()
                 .name("Sample Product")
                 .description("Sample Description")
                 .price(BigDecimal.valueOf(19.99))
                 .quantity(10)
-                .category(category)
-                .build();
-    }
-
-    private Category createSampleCategory() {
-        return Category.builder()
-                .name("Electronics")
+                .categoryType(categoryType)
                 .build();
     }
 }

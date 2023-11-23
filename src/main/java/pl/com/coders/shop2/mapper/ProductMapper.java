@@ -1,4 +1,4 @@
-package pl.com.coders.shop2.controller.mapper;
+package pl.com.coders.shop2.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

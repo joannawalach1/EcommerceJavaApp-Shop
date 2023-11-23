@@ -38,7 +38,7 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQL92Dialect
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
   mvc:
     pathmatch:
       matching-strategy: ANT_PATH_MATCHER
@@ -46,6 +46,6 @@ spring:
     init:
       mode: always
   liquibase:
-    enabled: 'false'
+    enabled: 'true'
     change-log: classpath:liquibase-changeLog.xml
 

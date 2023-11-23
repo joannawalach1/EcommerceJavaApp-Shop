@@ -13,7 +13,8 @@ import java.util.List;
 public class ProductService {
     private final ProductRepository productRepository;
     public ProductDto create(ProductDto productDto) {
-        return productRepository.add(productDto);
+        ProductDto add = productRepository.add(productDto);
+        return add;
     }
     public ProductDto get(Long id) {
         return productRepository.getProductById(id);
