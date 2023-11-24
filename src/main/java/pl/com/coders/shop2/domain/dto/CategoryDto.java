@@ -1,4 +1,4 @@
-package pl.com.coders.shop2.domain;
+package pl.com.coders.shop2.domain.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

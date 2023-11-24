@@ -7,16 +7,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import pl.com.coders.shop2.domain.Category;
 import pl.com.coders.shop2.domain.CategoryType;
 import pl.com.coders.shop2.domain.Product;
-import pl.com.coders.shop2.domain.ProductDto;
 import pl.com.coders.shop2.exceptions.ProductWithGivenIdNotExistsException;
-import pl.com.coders.shop2.exceptions.ProductWithGivenTitleExistsException;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest
 class ProductRepositoryTest {

@@ -1,6 +1,7 @@
-package pl.com.coders.shop2.domain;
+package pl.com.coders.shop2.domain.dto;
 
 import lombok.*;
+import pl.com.coders.shop2.domain.CategoryType;
 
 import javax.persistence.*;
 import java.math.BigDecimal;

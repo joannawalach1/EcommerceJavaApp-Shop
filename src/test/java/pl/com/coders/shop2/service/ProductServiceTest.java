@@ -6,6 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import pl.com.coders.shop2.domain.*;
+import pl.com.coders.shop2.domain.dto.ProductDto;
 import pl.com.coders.shop2.mapper.ProductMapper;
 import pl.com.coders.shop2.repository.CategoryRepository;
 import pl.com.coders.shop2.repository.ProductRepository;

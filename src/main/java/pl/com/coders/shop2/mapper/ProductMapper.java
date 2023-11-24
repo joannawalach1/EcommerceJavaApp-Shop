@@ -4,7 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 import pl.com.coders.shop2.domain.Product;
-import pl.com.coders.shop2.domain.ProductDto;
+import pl.com.coders.shop2.domain.dto.ProductDto;
 
 @Mapper(componentModel = "spring")
 public interface ProductMapper {

@@ -4,7 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.com.coders.shop2.domain.Product;
-import pl.com.coders.shop2.domain.ProductDto;
+import pl.com.coders.shop2.domain.dto.ProductDto;
 import pl.com.coders.shop2.service.ProductService;
 
 import java.util.List;
@@ -43,15 +43,9 @@ public class ProductController {
         return ResponseEntity.ok(updatedProduct);
     }
 
-    @GetMapping("/getProductDto")
+    @GetMapping("/getProduct")
     public ResponseEntity<List<Product>> getAllProd() {
         List<Product> productList = productService.getAllProd();
-        return ResponseEntity.ok(productList);
-    }
-
-    @GetMapping("/getProduct")
-    public ResponseEntity<List<ProductDto>> getAll() {
-        List<ProductDto> productList = productService.getAll();
         return ResponseEntity.ok(productList);
     }
 }
