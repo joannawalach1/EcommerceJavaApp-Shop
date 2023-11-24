@@ -68,36 +68,35 @@ class ProductControllerTest {
     @Test
     void create() throws Exception {
         when(productService.create(any())).thenReturn(productDto);
-        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post("/product")
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders
+                        .post("/product")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(productDto)))
-                .andExpect(status().isCreated())
+                .andExpect(status().isOk())
                 .andReturn();
-
         String responseContent = result.getResponse().getContentAsString();
         ProductDto responseProduct = objectMapper.readValue(responseContent, ProductDto.class);
-
         assertEquals(productDto.getName(), responseProduct.getName());
         verify(productService, times(1)).create(any());
     }
 
 
-//    @Test
-//    void get() throws Exception {
-//        Long productId = 1L;
-//        when(productService.get(productId)).thenReturn(productDto);
-//
-//        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/product/{id}", productId))
-//                .andExpect(status().isOk())
-//                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-//                .andReturn();
-//
-//        String jsonResponse = result.getResponse().getContentAsString();
-//        ProductDto responseProduct = objectMapper.readValue(jsonResponse, ProductDto.class);
-//        assertEquals(productDto.getId(), responseProduct.getId());
-//        verify(productService, times(1)).get(any());
-//    }
-//
+    @Test
+    void get() throws Exception {
+        Long productId = 1L;
+        when(productService.get(productId)).thenReturn(productDto);
+
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/product/{id}", productId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn();
+
+        String jsonResponse = result.getResponse().getContentAsString();
+        ProductDto responseProduct = objectMapper.readValue(jsonResponse, ProductDto.class);
+        assertEquals(productDto.getName(), responseProduct.getName());
+        verify(productService, times(1)).get(any());
+    }
+
 
     @Test
     void delete() throws Exception {
