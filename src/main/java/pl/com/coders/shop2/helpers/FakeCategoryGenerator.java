@@ -32,7 +32,7 @@
 //
 //    public Category generateFakeCategory() {
 //        String name = faker.commerce().department();
-//        while (categoryRepository.existsByName(name)) {
+//        while (categoryRepository.foundByName(name)) {
 //            name = faker.commerce().department();
 //        }
 //        Category category = new Category();
