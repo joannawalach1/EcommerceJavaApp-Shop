@@ -5,8 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import pl.com.coders.shop2.domain.Category;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
+
 @SpringBootTest
 class CategoryRepositoryTest {
 
@@ -25,6 +25,6 @@ class CategoryRepositoryTest {
     void foundByName() {
         String categoryName = "ELEKTRONIKA";
         boolean found = categoryRepository.existsByName(categoryName);
-        assertEquals(true, found);
+        assertTrue(found);
     }
 }

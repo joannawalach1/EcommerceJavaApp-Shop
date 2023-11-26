@@ -4,6 +4,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Data
@@ -20,6 +21,8 @@ public class User {
     private String firstName;
     private String lastName;
     private String password;
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.ALL}, fetch = FetchType.EAGER)
+    List<Order> orders;
     private LocalDateTime created;
     private LocalDateTime updated;
 }

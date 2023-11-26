@@ -1,7 +1,5 @@
 package pl.com.coders.shop2.domain;
 
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -25,6 +23,9 @@ public class Product {
     @JoinColumn(name = "category_id")
     //@JsonIgnore
     private Category category;
+    @ManyToOne
+    @JoinColumn(name = "order_id")
+    private Order order;
     private String name;
     private String description;
     private BigDecimal price;
