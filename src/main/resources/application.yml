@@ -21,11 +21,11 @@
 #  sql:
 #    init:
 #      mode: always
-#
-#
+
+
 
 server:
-  port: 8080
+  port: 8083
 spring:
   datasource:
     username: postgres
@@ -38,10 +38,14 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQL92Dialect
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
   mvc:
     pathmatch:
       matching-strategy: ANT_PATH_MATCHER
   sql:
     init:
       mode: always
+  liquibase:
+    enabled: 'true'
+    change-log: classpath:liquibase-changeLog.xml
+

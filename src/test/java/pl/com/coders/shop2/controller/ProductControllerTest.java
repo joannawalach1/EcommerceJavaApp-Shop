@@ -16,15 +16,22 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import pl.com.coders.shop2.domain.Category;
+import pl.com.coders.shop2.domain.CategoryType;
 import pl.com.coders.shop2.domain.Product;
-import pl.com.coders.shop2.repository.ProductRepository;
+import pl.com.coders.shop2.domain.ProductDto;
 import pl.com.coders.shop2.service.ProductService;
 
 import java.math.BigDecimal;
 
+import static net.bytebuddy.matcher.ElementMatchers.is;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.internal.verification.VerificationModeFactory.times;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -43,46 +50,51 @@ class ProductControllerTest {
     @MockBean
     private ProductService productService;
 
-    @MockBean
-    private ProductRepository productRepository;
     private Category category;
+    private CategoryType categoryType;
+    private ProductDto productDto;
     private Product product;
 
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
+        categoryType = CategoryType.ELEKTRONIKA;
         category = createSampleCategory();
-        product = createSampleProduct(category);
-        when(productService.create(product)).thenReturn(product);
+        productDto = createSampleDtoProduct(categoryType);
+        when(productService.create(productDto)).thenReturn(productDto);
     }
 
     @Test
     void create() throws Exception {
-        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post("/product")
+        when(productService.create(any())).thenReturn(productDto);
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders
+                        .post("/product")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(product)))
+                        .content(objectMapper.writeValueAsString(productDto)))
                 .andExpect(status().isOk())
                 .andReturn();
-
         String responseContent = result.getResponse().getContentAsString();
-        Product responseProduct = objectMapper.readValue(responseContent, Product.class);
-
-        assertEquals(product, responseProduct);
+        ProductDto responseProduct = objectMapper.readValue(responseContent, ProductDto.class);
+        assertEquals(productDto.getName(), responseProduct.getName());
+        verify(productService, times(1)).create(any());
     }
+
 
     @Test
     void get() throws Exception {
         Long productId = 1L;
-        when(productService.get((productId))).thenReturn(product);
+        when(productService.get(productId)).thenReturn(productDto);
 
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/product/{id}", productId))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andReturn();
-        String json = result.getResponse().getContentAsString();
-        Product responseProduct = objectMapper.readValue(json, Product.class);
-        assertEquals(product, responseProduct);
+
+        String jsonResponse = result.getResponse().getContentAsString();
+        ProductDto responseProduct = objectMapper.readValue(jsonResponse, ProductDto.class);
+        assertEquals(productDto.getName(), responseProduct.getName());
+        verify(productService, times(1)).get(any());
     }
 
 
@@ -91,38 +103,48 @@ class ProductControllerTest {
         long productId = 1L;
         when(productService.delete(productId)).thenReturn(true);
 
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.delete("/product")
-                        .param("id", String.valueOf(productId))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/product/{id}", productId)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn();
+                .andExpect(status().isNoContent());
 
-        String responseContent = mvcResult.getResponse().getContentAsString();
-        assertNotNull(mvcResult);
+        verify(productService, times(1)).delete(productId);
     }
 
     @Test
     void update() throws Exception {
-        Long productId = 1L;
-        Product updatedProduct = createSampleProduct(category);
-        String json = objectMapper.writeValueAsString(updatedProduct);
+            Long productId = 1L;
+            ProductDto updatedProduct = createSampleDtoProduct(categoryType);
+            String json = objectMapper.writeValueAsString(updatedProduct);
 
-        when(productService.update(updatedProduct, productId)).thenReturn(updatedProduct);
+            when(productService.update(any(), eq(productId))).thenReturn(updatedProduct);
 
-        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.put("/product/{id}", productId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(product)))
-                .andExpect(status().isOk())
-                .andReturn();
+            MvcResult result = mockMvc.perform(MockMvcRequestBuilders.put("/product/{id}", productId)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(json))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andReturn();
 
-        String responseContent = result.getResponse().getContentAsString();
-        Product responseProduct = objectMapper.readValue(responseContent, Product.class);
-        assertEquals(updatedProduct, responseProduct);
+            String responseContent = result.getResponse().getContentAsString();
+            ProductDto responseProduct = objectMapper.readValue(responseContent, ProductDto.class);
+
+        assertEquals(productDto.getName(), responseProduct.getName());
+        verify(productService, times(1)).update(any(), any());
+         }
+
+    private ProductDto createSampleDtoProduct(CategoryType categoryType) {
+        return ProductDto.builder()
+                .name("Sample Product")
+                .description("Sample Description")
+                .price(BigDecimal.valueOf(19.99))
+                .quantity(10)
+                .categoryType(categoryType)
+                .build();
     }
-
 
     private Product createSampleProduct(Category category) {
         return Product.builder()
+                .category(category)
                 .name("Sample Product")
                 .description("Sample Description")
                 .price(BigDecimal.valueOf(19.99))
@@ -132,7 +154,7 @@ class ProductControllerTest {
 
     private Category createSampleCategory() {
         return Category.builder()
-                .name("Books")
+                .name("Sample Category")
                 .build();
     }
 }

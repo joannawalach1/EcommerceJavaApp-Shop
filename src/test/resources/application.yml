@@ -21,7 +21,11 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQL92Dialect
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
   sql:
     init:
       mode: always
+
+  liquibase:
+    enabled: 'true'
+    change-log: classpath:liquibase-changeLog.xml

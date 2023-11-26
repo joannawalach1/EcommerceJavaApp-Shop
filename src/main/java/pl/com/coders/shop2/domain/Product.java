@@ -1,6 +1,7 @@
 package pl.com.coders.shop2.domain;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -15,12 +16,14 @@ import java.time.LocalDateTime;
 @Builder
 @EqualsAndHashCode(of = {"id"})
 
+@Table(name = "PRODUCT")
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @ManyToOne()
     @JoinColumn(name = "category_id")
+    //@JsonIgnore
     private Category category;
     private String name;
     private String description;
@@ -41,6 +44,6 @@ public class Product {
 
     @Override
     public String toString() {
-        return "Product{id=" + id + ", name='" + name + "', price=" + price + "}";
+        return "Product{id=" + id + "category" + category + "'name='" + name + ", description=" + description + ", price=" + price + ", quantity=" + quantity + ", created=" + created + ", updated=" + updated + "}";
     }
 }

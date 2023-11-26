@@ -4,10 +4,15 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import pl.com.coders.shop2.domain.Category;
 import pl.com.coders.shop2.domain.Product;
+import pl.com.coders.shop2.domain.ProductDto;
+import pl.com.coders.shop2.exceptions.ProductWithGivenIdNotExistsException;
+import pl.com.coders.shop2.exceptions.ProductWithGivenTitleExistsException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class ProductRepository {
@@ -18,14 +23,22 @@ public class ProductRepository {
         this.entityManager = entityManager;
     }
 
-    @Transactional
-    public Product add(Product product) {
+    @Transactional(rollbackFor = ProductWithGivenTitleExistsException.class)
+    public Product add(Product product) throws ProductWithGivenTitleExistsException {
+        if (getProductByName(product.getName()).isPresent()) {
+            throw new ProductWithGivenTitleExistsException("Product with the given title already exists.");
+        }
         return entityManager.merge(product);
     }
 
-    public Product getProductById(Long id) {
-        return entityManager.find(Product.class, id);
+    public Product getProductById(Long id) throws ProductWithGivenIdNotExistsException {
+        Product product = entityManager.find(Product.class, id);
+        if (product == null) {
+            throw new ProductWithGivenIdNotExistsException("Product with the given Id " + id + " doesn't exist");
+        }
+        return product;
     }
+
 
     public List<Product> getProductsByCategory(Category category) {
         String jpql = "SELECT p FROM Product p WHERE p.category = :category";
@@ -34,22 +47,36 @@ public class ProductRepository {
                 .getResultList();
     }
 
+
     @Transactional
     public boolean delete(Long id) {
         Product product = entityManager.find(Product.class, id);
-        entityManager.remove(product);
-        return true;
+        if (product != null) {
+            entityManager.remove(product);
+            return true;
+        }
+        return false;
     }
 
 
     @Transactional
-    public Product update(Product product) {
-        entityManager.merge(product);
-        return product;
+    public Product update(Product product, Long id) throws ProductWithGivenIdNotExistsException {
+        if (product.getId() == null || entityManager.find(Product.class, product.getId()) == null) {
+            throw new ProductWithGivenIdNotExistsException("Product with the given ID does not exist.");
+        }
+        return entityManager.merge(product);
     }
 
-    public List<Product> findAll() {
-        return entityManager.createQuery("SELECT p FROM Product p", Product.class).getResultList();
+    @Transactional
+    public List<ProductDto> findAll() {
+        return entityManager.createQuery("SELECT p FROM ProductDto p", ProductDto.class)
+                .getResultList();
+    }
+
+    @Transactional
+    public List<Product> findAllProd() {
+        return entityManager.createQuery("SELECT p FROM Product p", Product.class)
+                .getResultList();
     }
 
     @Transactional
@@ -57,4 +84,10 @@ public class ProductRepository {
         entityManager.createQuery("DELETE FROM Product").executeUpdate();
     }
 
+    private Optional<Product> getProductByName(String name) {
+        String jpql = "SELECT p FROM Product p WHERE p.name = :name";
+        TypedQuery<Product> query = entityManager.createQuery(jpql, Product.class)
+                .setParameter("name", name);
+        return query.getResultStream().findFirst();
+    }
 }
