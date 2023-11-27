@@ -15,15 +15,15 @@ import java.util.UUID;
 @Builder
 @EqualsAndHashCode()
 
-@Table(name = "ORDER")
-public class Order {
+@Table(name = "ORDERS")
+public class Orders {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private UUID id;
     private int totalAmount;
     @ManyToOne()
     @JoinColumn(name = "user_id")
-    private User user;
+    private Users user;
     @OneToMany(mappedBy = "order", cascade = {CascadeType.ALL}, fetch = FetchType.EAGER)
     private List<Product> products;
     @CreationTimestamp

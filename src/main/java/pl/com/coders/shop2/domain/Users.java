@@ -13,7 +13,7 @@ import java.util.List;
 @Builder
 @EqualsAndHashCode(of = {"id"})
 @Table(name = "users")
-public class User {
+public class Users {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,7 +22,7 @@ public class User {
     private String lastName;
     private String password;
     @OneToMany(mappedBy = "user", cascade = {CascadeType.ALL}, fetch = FetchType.EAGER)
-    List<Order> orders;
+    List<Orders> orders;
     private LocalDateTime created;
     private LocalDateTime updated;
 }

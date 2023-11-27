@@ -2,13 +2,11 @@ package pl.com.coders.shop2.repository;
 
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import pl.com.coders.shop2.domain.User;
-import pl.com.coders.shop2.exceptions.ProductWithGivenIdNotExistsException;
+import pl.com.coders.shop2.domain.Users;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
-import java.util.List;
 
 @Repository
 public class UserRepository {
@@ -16,13 +14,13 @@ public class UserRepository {
     private EntityManager entityManager;
 
     @Transactional
-    public User create(User user) {
+    public Users create(Users user) {
         return entityManager.merge(user);
     }
 
-    public User findByEmail(String email) {
-        TypedQuery<User> query = entityManager.createQuery(
-                "SELECT u FROM User u WHERE u.email = :email", User.class);
+    public Users findByEmail(String email) {
+        TypedQuery<Users> query = entityManager.createQuery(
+                "SELECT u FROM Users u WHERE u.email = :email", Users.class);
         query.setParameter("email", email);
 
         return query.getSingleResult();

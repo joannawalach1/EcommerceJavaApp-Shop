@@ -25,7 +25,7 @@ public class Product {
     private Category category;
     @ManyToOne
     @JoinColumn(name = "order_id")
-    private Order order;
+    private Orders order;
     private String name;
     private String description;
     private BigDecimal price;
