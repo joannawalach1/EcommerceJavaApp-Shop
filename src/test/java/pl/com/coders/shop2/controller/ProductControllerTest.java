@@ -18,14 +18,13 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import pl.com.coders.shop2.domain.Category;
 import pl.com.coders.shop2.domain.CategoryType;
 import pl.com.coders.shop2.domain.Product;
-import pl.com.coders.shop2.domain.ProductDto;
+import pl.com.coders.shop2.domain.dto.ProductDto;
 import pl.com.coders.shop2.service.ProductService;
 
 import java.math.BigDecimal;
 
 import static net.bytebuddy.matcher.ElementMatchers.is;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;

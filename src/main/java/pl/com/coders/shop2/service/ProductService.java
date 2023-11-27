@@ -2,8 +2,9 @@ package pl.com.coders.shop2.service;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import pl.com.coders.shop2.domain.Product;
-import pl.com.coders.shop2.domain.ProductDto;
+import pl.com.coders.shop2.domain.dto.ProductDto;
 import pl.com.coders.shop2.mapper.ProductMapper;
 import pl.com.coders.shop2.repository.CategoryRepository;
 import pl.com.coders.shop2.repository.ProductRepository;
@@ -36,7 +37,6 @@ public class ProductService {
         return productMapper.productToDto(update);
     }
 
-    public List<ProductDto> getAll() {return productRepository.findAll();}
     public List<Product> getAllProd() {return productRepository.findAllProd();}
 
 }

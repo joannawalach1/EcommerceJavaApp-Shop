@@ -7,16 +7,17 @@ import org.springframework.boot.test.context.SpringBootTest;
 import pl.com.coders.shop2.domain.Category;
 import pl.com.coders.shop2.domain.CategoryType;
 import pl.com.coders.shop2.domain.Product;
-import pl.com.coders.shop2.domain.ProductDto;
+import pl.com.coders.shop2.domain.dto.ProductDto;
 import pl.com.coders.shop2.exceptions.ProductWithGivenIdNotExistsException;
 import pl.com.coders.shop2.exceptions.ProductWithGivenTitleExistsException;
+import pl.com.coders.shop2.exceptions.ProductWithGivenTitleNotExistsException;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest
 class ProductRepositoryTest {
@@ -31,7 +32,6 @@ class ProductRepositoryTest {
     private Category category;
 
     private CategoryType categoryType;
-
 
 
     @BeforeEach
@@ -67,25 +67,16 @@ class ProductRepositoryTest {
         assertTrue(deleteResult);
     }
 
-//    @Test
-//    void shouldUpdateProductInRepository() {
-//        categoryType = categoryType.MOTORYZACJA;
-//        Product newProduct = createSampleProduct(categoryType);
-//        boolean categoryType = categoryRepository.existsById(1L);
-//        Product addedProduct = productRepository.add(newProduct);
-//
-//        LocalDateTime expectedCreated = addedProduct.getCreated().withNano(0);
-//        addedProduct.setName("Updated Product");
-//        addedProduct.setPrice(BigDecimal.valueOf(29.99));
-//
-//        ProductDto updatedProduct = productRepository.update(addedProduct);
-//
-//        LocalDateTime actualCreated = updatedProduct.getCreated().withNano(0);
-//        assertThat(actualCreated).isEqualTo(expectedCreated);
-//
-//        assertThat(updatedProduct.getName()).isEqualTo("Updated Product");
-//        assertThat(updatedProduct.getPrice()).isEqualTo(BigDecimal.valueOf(29.99));
-//    }
+    @Test
+    void shouldUpdateProductInRepository() {
+        category = categoryRepository.getCategoryById(1L);
+        Product exitingProduct = productRepository.add(new Product(category, "Product15", "Description11", BigDecimal.valueOf(200), 50));
+        Product newProduct = new Product(category, "Product15", "Description13", BigDecimal.valueOf(500), 5);
+
+        Product updatedProduct = productRepository.update(newProduct, exitingProduct.getId());
+        assertNotNull(updatedProduct);
+        assertEquals(exitingProduct.getId(), updatedProduct.getId());
+    }
 
     @Test
     void shouldFindAllProductsInRepository() {
@@ -93,11 +84,11 @@ class ProductRepositoryTest {
         assertEquals(11, allProducts.size());
     }
 
-//    @Test
-//    void add_WithNullProductName_ShouldThrowException() {
-//        ProductDto productDto = new ProductDto();
-//        assertThrows(ProductWithGivenTitleExistsException.class, () -> productRepository.add(productDto));
-//    }
+    @Test
+    void add_WithNullProductName_ShouldThrowException() {
+        Product productWithNullName = new Product(category, null, "Description13", BigDecimal.valueOf(200), 50);
+        assertThrows(ProductWithGivenTitleNotExistsException.class, () -> productRepository.add(productWithNullName));
+    }
 
     @Test
     void getProductById_WithNonExistingId_ShouldThrowException() {
@@ -126,5 +117,5 @@ class ProductRepositoryTest {
                 .build();
     }
 
-    }
+}
 
