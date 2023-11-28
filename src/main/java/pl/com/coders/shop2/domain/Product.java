@@ -36,7 +36,7 @@ public class Product {
             joinColumns = @JoinColumn(name = "order_id"),
             inverseJoinColumns = @JoinColumn(name = "product_id"))
     @JsonIgnore
-    private Set<Product> products = new HashSet<>();
+    private Set<Order> orders = new HashSet<>();
 
     @CreationTimestamp
     private LocalDateTime created;
