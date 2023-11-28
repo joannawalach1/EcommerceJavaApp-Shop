@@ -1,3 +1,6 @@
+--liquibase formatted sql
+
+--changeset liquibase:4
 INSERT INTO product (category_id, name, description, price, quantity, created, updated)
 VALUES (1, 'Product A', 'Description A', 19.99, 10, NOW(), NOW()),
        (2, 'Product B', 'Description B', 29.99, 5, NOW(), NOW()),

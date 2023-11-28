@@ -4,7 +4,7 @@
 
 CREATE TABLE IF NOT EXISTS category
 (
-    id SERIAL PRIMARY KEY,
+    id SERIAL PRIMARY KEY not null,
     name TEXT,
     created TIMESTAMP,
     updated TIMESTAMP

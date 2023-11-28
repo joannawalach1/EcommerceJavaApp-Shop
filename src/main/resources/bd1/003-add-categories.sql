@@ -1,3 +1,6 @@
+--liquibase formatted sql
+
+--changeset liquibase:3
 INSERT INTO category (name, created, updated) VALUES
                                                   ('ELEKTRONIKA', current_timestamp, current_timestamp),
                                                   ('MOTORYZACJA', current_timestamp, current_timestamp),
