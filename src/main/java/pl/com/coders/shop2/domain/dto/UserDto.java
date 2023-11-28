@@ -7,7 +7,6 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @ToString
-@EqualsAndHashCode(of = {"id"})
 public class UserDto {
     private String email;
     private String firstName;

@@ -2,8 +2,7 @@ package pl.com.coders.shop2.repository;
 
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import pl.com.coders.shop2.domain.Users;
-
+import pl.com.coders.shop2.domain.User;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
@@ -14,13 +13,13 @@ public class UserRepository {
     private EntityManager entityManager;
 
     @Transactional
-    public Users create(Users user) {
+    public User create(User user) {
         return entityManager.merge(user);
     }
 
-    public Users findByEmail(String email) {
-        TypedQuery<Users> query = entityManager.createQuery(
-                "SELECT u FROM Users u WHERE u.email = :email", Users.class);
+    public User findByEmail(String email) {
+        TypedQuery<User> query = entityManager.createQuery(
+                "SELECT u FROM User u WHERE u.email = :email", User.class);
         query.setParameter("email", email);
 
         return query.getSingleResult();

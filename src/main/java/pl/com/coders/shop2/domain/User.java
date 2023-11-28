@@ -11,9 +11,9 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(of = {"id"})
+@EqualsAndHashCode
 @Table(name = "users")
-public class Users {
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -21,8 +21,8 @@ public class Users {
     private String firstName;
     private String lastName;
     private String password;
-    @OneToMany(mappedBy = "user", cascade = {CascadeType.ALL}, fetch = FetchType.EAGER)
-    List<Orders> orders;
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.ALL})
+    List<Order> order;
     private LocalDateTime created;
     private LocalDateTime updated;
 }

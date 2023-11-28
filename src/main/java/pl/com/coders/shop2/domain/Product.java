@@ -1,37 +1,46 @@
 package pl.com.coders.shop2.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Set;
+import java.util.HashSet;
 
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(of = {"id"})
-
-@Table(name = "PRODUCT")
+@Table(name = "products")
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @ManyToOne()
-    @JoinColumn(name = "category_id")
-    //@JsonIgnore
-    private Category category;
+
     @ManyToOne
-    @JoinColumn(name = "order_id")
-    private Orders order;
+    @JoinColumn(name = "category_id")
+    private Category category;
+
     private String name;
     private String description;
     private BigDecimal price;
     private int quantity;
+
+    @ManyToMany(fetch = FetchType.LAZY,
+            cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @JoinTable(name = "order_line_item",
+            joinColumns = @JoinColumn(name = "order_id"),
+            inverseJoinColumns = @JoinColumn(name = "product_id"))
+    @JsonIgnore
+    private Set<Product> products = new HashSet<>();
+
     @CreationTimestamp
     private LocalDateTime created;
+
     @CreationTimestamp
     private LocalDateTime updated;
 
