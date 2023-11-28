@@ -2,7 +2,7 @@
 
 --changeset liquibase:2
 
-CREATE TABLE IF NOT EXISTS product
+CREATE TABLE IF NOT EXISTS products
 (
     id SERIAL PRIMARY KEY,
     category_id BIGINT REFERENCES category(id),
