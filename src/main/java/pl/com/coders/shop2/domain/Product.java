@@ -1,28 +1,31 @@
 package pl.com.coders.shop2.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Set;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Entity
+@Table(name = "products")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "products")
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "product_id")
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "category_id")
     private Category category;
 
     private String name;
@@ -30,13 +33,8 @@ public class Product {
     private BigDecimal price;
     private int quantity;
 
-    @ManyToMany(fetch = FetchType.LAZY,
-            cascade = { CascadeType.PERSIST, CascadeType.MERGE })
-    @JoinTable(name = "order_line_item",
-            joinColumns = @JoinColumn(name = "order_id"),
-            inverseJoinColumns = @JoinColumn(name = "product_id"))
-    @JsonIgnore
-    private Set<Order> orders = new HashSet<>();
+    @OneToMany(mappedBy = "product")
+    private Set<Order_Line_Item> orderLineItems = new HashSet<>();
 
     @CreationTimestamp
     private LocalDateTime created;

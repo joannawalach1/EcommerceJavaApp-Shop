@@ -24,7 +24,7 @@ class ProductServiceTest {
     @Mock
     private ProductMapper productMapper;
     @Mock
-    CategoryRepository categoryRepository;
+    private CategoryRepository categoryRepository;
     @InjectMocks
     private ProductService productService;
 
