@@ -1,0 +1,52 @@
+package pl.com.coders.shop2.controller;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import pl.com.coders.shop2.domain.dto.CartDto;
+import pl.com.coders.shop2.service.CartService;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/carts")
+public class CartController {
+
+    private final CartService cartService;
+
+    public CartController(CartService cartService) {
+        this.cartService = cartService;
+    }
+
+    @GetMapping("/cart/{id}")
+    public ResponseEntity<CartDto> getCartsByUserId(@PathVariable Long userId) {
+        CartDto cartsByUserId = cartService.getCartByUserId(userId);
+        return ResponseEntity.status(HttpStatus.OK).body(cartsByUserId);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<CartDto> findCartByCartId(@PathVariable Long cartId) {
+        CartDto cartsByCartId = cartService.getCartByCartId(cartId);
+        return ResponseEntity.status(HttpStatus.OK).body(cartsByCartId);
+    }
+
+    @PostMapping
+    public ResponseEntity<CartDto> saveCart(@RequestBody CartDto cartDto) {
+        CartDto createdCart = cartService.saveCart(cartDto);
+        return ResponseEntity.status(HttpStatus.OK).body(createdCart);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long cartId) {
+        cartService.delete(cartId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/getOrder")
+    public ResponseEntity<List<CartDto>> findAllCarts() {
+        List<CartDto> allCarts = cartService.getAll();
+        return ResponseEntity.status(HttpStatus.OK).body(allCarts);
+    }
+}
+
+

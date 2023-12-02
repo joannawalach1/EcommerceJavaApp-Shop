@@ -25,6 +25,8 @@ public class User {
     private String password;
     @OneToMany(mappedBy = "user")
     private Set<Order> orders;
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private Cart cart;
     private LocalDateTime created;
     private LocalDateTime updated;
 
