@@ -13,7 +13,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Order_Line_Item {
+public class OrderLineItem {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;

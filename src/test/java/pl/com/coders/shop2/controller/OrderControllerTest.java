@@ -58,8 +58,7 @@ class OrderControllerTest {
 
     private List<Order> allOrders;
 
-    @BeforeEach
-    void setUp() {
+    @BeforeEach void setUp() {
         allOrders = prepareTestData();
     }
 
@@ -114,11 +113,9 @@ class OrderControllerTest {
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/orders/getOrder"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(objectMapper.writeValueAsString(allOrders)))
                 .andReturn();
 
-        String jsonResponse = result.getResponse().getContentAsString();
-        List<Order> responseOrders = objectMapper.readValue(jsonResponse, new TypeReference<List<Order>>() {
-        });
         assertNotNull(result);
         verify(orderService, Mockito.times(1)).findAllOrders();
     }

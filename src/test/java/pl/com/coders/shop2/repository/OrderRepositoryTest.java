@@ -22,11 +22,9 @@ class OrderRepositoryTest {
     @Autowired
     private UserRepository userRepository;
 
-    private List<Order> allOrders;
-
     @BeforeEach
     void setUp() {
-        allOrders = prepareTestData();
+        prepareTestData();
     }
 
     @Test

@@ -1,4 +1,4 @@
-CREATE TABLE category_dto (
-id BIGSERIAL PRIMARY KEY NOT NULL,
-title TEXT
-);
+--CREATE TABLE category_dto (
+--id BIGSERIAL PRIMARY KEY NOT NULL,
+--title TEXT
+--);
