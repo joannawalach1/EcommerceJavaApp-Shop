@@ -57,7 +57,6 @@ class ProductControllerTest {
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
         categoryType = CategoryType.ELEKTRONIKA;
         category = createSampleCategory();
         productDto = createSampleDtoProduct(categoryType);

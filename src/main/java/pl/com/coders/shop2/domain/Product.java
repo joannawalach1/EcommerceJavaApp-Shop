@@ -1,36 +1,44 @@
 package pl.com.coders.shop2.domain;
 
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Entity
+@Table(name = "products")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(of = {"id"})
-
-@Table(name = "PRODUCT")
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "product_id")
     private Long id;
-    @ManyToOne()
-    @JoinColumn(name = "category_id")
-    //@JsonIgnore
+
+    @ManyToOne
     private Category category;
+
     private String name;
     private String description;
     private BigDecimal price;
     private int quantity;
+
+    @OneToMany(mappedBy = "product")
+    private Set<OrderLineItem> orderLineItems = new HashSet<>();
+
     @CreationTimestamp
     private LocalDateTime created;
+
     @CreationTimestamp
     private LocalDateTime updated;
 
