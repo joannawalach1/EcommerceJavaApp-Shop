@@ -4,7 +4,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import pl.com.coders.shop2.domain.Category;
 import pl.com.coders.shop2.domain.Product;
-import pl.com.coders.shop2.domain.dto.ProductDto;
 import pl.com.coders.shop2.exceptions.ProductWithGivenIdNotExistsException;
 import pl.com.coders.shop2.exceptions.ProductWithGivenTitleExistsException;
 import pl.com.coders.shop2.exceptions.ProductWithGivenTitleNotExistsException;
@@ -52,11 +51,10 @@ public class ProductRepository {
                 .getResultList();
     }
 
-
     @Transactional
     public boolean delete(Long id) {
-        Query query = entityManager.createQuery("DELETE FROM Product p WHERE p.id = :productId");
-        query.setParameter("productId", id);
+        Query query = entityManager.createQuery("DELETE FROM Product p WHERE p.id = :id")
+                .setParameter("id", id);
 
         int deletedCount = query.executeUpdate();
         return deletedCount > 0;
@@ -91,7 +89,7 @@ public class ProductRepository {
         entityManager.createQuery("DELETE FROM Product").executeUpdate();
     }
 
-    private Optional<Product> getProductByName(String name) {
+    public Optional<Product> getProductByName(String name) {
         String jpql = "SELECT p FROM Product p WHERE p.name = :name";
         TypedQuery<Product> query = entityManager.createQuery(jpql, Product.class)
                 .setParameter("name", name);

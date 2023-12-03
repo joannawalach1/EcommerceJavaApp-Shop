@@ -11,9 +11,8 @@ import java.math.BigDecimal;
 @ToString
 @EqualsAndHashCode()
 public class CartLineItemDto {
-    private Long cartId;
-    private Long productId;
+    private String productTitle;
     private int cartLineQuantity;
     private BigDecimal cartLinePrice;
-    private Integer cartIndex;
+    private int cartIndex;
 }

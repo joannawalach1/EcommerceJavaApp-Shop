@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import pl.com.coders.shop2.domain.dto.CartDto;
 import pl.com.coders.shop2.service.CartService;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -31,8 +32,8 @@ public class CartController {
     }
 
     @PostMapping
-    public ResponseEntity<CartDto> saveCart(@RequestBody CartDto cartDto) {
-        CartDto createdCart = cartService.saveCart(cartDto);
+    public ResponseEntity<CartDto> saveCart(@RequestBody String productTitle, int id, BigDecimal cartLinePrize, String userEmail ) {
+        CartDto createdCart = cartService.saveCart(productTitle, id, cartLinePrize, userEmail);
         return ResponseEntity.status(HttpStatus.OK).body(createdCart);
     }
 
@@ -46,6 +47,11 @@ public class CartController {
     public ResponseEntity<List<CartDto>> findAllCarts() {
         List<CartDto> allCarts = cartService.getAll();
         return ResponseEntity.status(HttpStatus.OK).body(allCarts);
+    }
+
+    @PostMapping("/{productTitle}/{cartLineQuantity}/addToCart")
+    public CartDto addToCart(@PathVariable String productTitle, @PathVariable int cartLineQuantity, BigDecimal cartLinePrize, String userEmail) {
+        return cartService.saveCart(productTitle, cartLineQuantity, cartLinePrize, userEmail);
     }
 }
 

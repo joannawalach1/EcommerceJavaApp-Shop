@@ -8,12 +8,14 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
-@Data
+@Table(name = "users")
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @EqualsAndHashCode
-@Table(name = "users")
+@Builder
+
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

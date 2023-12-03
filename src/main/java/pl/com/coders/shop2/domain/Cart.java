@@ -1,9 +1,6 @@
 package pl.com.coders.shop2.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -14,9 +11,11 @@ import java.util.List;
 
 @Entity
 @Table(name = "carts")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode
 @Builder
 public class Cart {
     @Id
@@ -33,4 +32,5 @@ public class Cart {
     private LocalDateTime created;
     @UpdateTimestamp
     private LocalDateTime updated;
+
 }

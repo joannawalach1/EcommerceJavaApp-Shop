@@ -15,7 +15,7 @@ import java.util.List;
 @ToString
 @EqualsAndHashCode()
 public class CartDto {
-    private String username;
+    private String userName;
     private BigDecimal totalPrice;
     @CreationTimestamp
     private LocalDateTime created;

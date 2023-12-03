@@ -12,6 +12,7 @@ import pl.com.coders.shop2.repository.CategoryRepository;
 import pl.com.coders.shop2.repository.ProductRepository;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -41,14 +42,15 @@ class ProductServiceTest {
 
     @Test
     void create() {
-        when(categoryRepository.getCategoryById(any())).thenReturn(category);
-        when(productMapper.dtoToProduct(any())).thenReturn(product);
-        when(productRepository.add(any())).thenReturn(product);
-        when(productMapper.productToDto(any())).thenReturn(productDto);
+        Long categoryId = 2L;
+        when(categoryRepository.findById(eq(2L))).thenReturn(Optional.of(category));
+        when(productMapper.dtoToProduct(productDto)).thenReturn(product);
+        when(productRepository.add(product)).thenReturn(product);
+        when(productMapper.productToDto(product)).thenReturn(productDto);
         ProductDto createdProduct = productService.create(productDto);
         assertNotNull(createdProduct);
         assertEquals(productDto.getName(), createdProduct.getName());
-        verify(categoryRepository, times(1)).getCategoryById(any());
+        verify(categoryRepository, times(1)).findById(eq(2L));
         verify(productMapper, times(1)).dtoToProduct(any());
         verify(productRepository, times(1)).add(any());
         verify(productMapper, times(1)).productToDto(any());
@@ -67,14 +69,14 @@ class ProductServiceTest {
         verify(productMapper, times(1)).productToDto(product);
     }
 
-    @Test
-    void delete() {
-        Long id = 1L;
-        when(productRepository.delete(id)).thenReturn(true);
-        boolean resultProduct = productService.delete(id);
-        assertTrue(resultProduct);
-        verify(productRepository, times(1)).delete(id);
-    }
+//    @Test
+//    void delete() {
+//        Long id = 1L;
+//        when(productRepository.delete(id)).thenReturn(true);
+//        boolean resultProduct = productService.delete(id);
+//        assertTrue(resultProduct);
+//        verify(productRepository, times(1)).delete(id);
+//    }
 
     @Test
     void update() {

@@ -15,6 +15,7 @@ import pl.com.coders.shop2.exceptions.ProductWithGivenTitleNotExistsException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -47,41 +48,40 @@ class ProductRepositoryTest {
         assertThat(product.getName()).isNotNull();
     }
 
-//    @Test
-//    void shouldGetProductFromRepositoryById() {
-//        Long productId = 1L;
-//        Product productById = productRepository.getProductById(productId);
-//        assertNotNull(productById.getId());
-//    }
+    @Test
+    void shouldGetProductFromRepositoryById() {
+        Product productById = productRepository.getProductById(1L);
+        assertNotNull(productById);
+    }
+
+    @Test
+    void shouldGetProductFromRepository() {
+        List<Product> foundProducts = productRepository.getProductsByCategory(category);
+        assertThat(foundProducts).isNotNull();
+    }
 
 //    @Test
-//    void shouldGetProductFromRepository() {
-//        List<Product> foundProducts = productRepository.getProductsByCategory(category);
-//        assertThat(foundProducts).isNotNull();
-//    }
-//
-//    @Test
 //    void shouldDeleteProductFromRepository() {
-//        Long productIdToDelete = 1L;
-//        boolean deleteResult = productRepository.delete(productIdToDelete);
-//        assertTrue(deleteResult);
+//        Long productIdToDelete = 2L;
+//        Product found = productRepository.getProductById(productIdToDelete);
+//        boolean deletedProduct = productRepository.delete(productIdToDelete);
+//        assertTrue(deletedProduct);
 //    }
-//
-//    @Test
-//    void shouldUpdateProductInRepository() {
-//        category = categoryRepository.getCategoryById(1L);
-//        Product exitingProduct = productRepository.add(new Product(category, "Product15", "Description11", BigDecimal.valueOf(200), 50));
-//        Product newProduct = new Product(category, "Product15", "Description13", BigDecimal.valueOf(500), 5);
-//
-//        Product updatedProduct = productRepository.update(newProduct, exitingProduct.getId());
-//        assertNotNull(updatedProduct);
-//        assertEquals(exitingProduct.getId(), updatedProduct.getId());
-//    }
+
+    @Test
+    void shouldUpdateProductInRepository() {
+        Product exitingProduct = productRepository.add(new Product(category, "Product15", "Description11", BigDecimal.valueOf(200), 50));
+        Product newProduct = new Product(category, "Product15", "Description13", BigDecimal.valueOf(500), 5);
+
+        Product updatedProduct = productRepository.update(newProduct, exitingProduct.getId());
+        assertNotNull(updatedProduct);
+        assertEquals(exitingProduct.getId(), updatedProduct.getId());
+    }
 
     @Test
     void shouldFindAllProductsInRepository() {
         List<Product> allProducts = productRepository.findAllProd();
-        assertEquals(2, allProducts.size());
+        assertEquals(3, allProducts.size());
     }
 
     @Test
