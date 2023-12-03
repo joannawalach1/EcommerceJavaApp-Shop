@@ -33,7 +33,7 @@ public class Product {
     private int quantity;
 
     @OneToMany(mappedBy = "product")
-    private Set<Order_Line_Item> orderLineItems = new HashSet<>();
+    private Set<OrderLineItem> orderLineItems = new HashSet<>();
 
     @CreationTimestamp
     private LocalDateTime created;

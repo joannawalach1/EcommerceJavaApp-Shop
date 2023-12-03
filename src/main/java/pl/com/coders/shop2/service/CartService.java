@@ -3,7 +3,7 @@ package pl.com.coders.shop2.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import pl.com.coders.shop2.domain.Cart;
-import pl.com.coders.shop2.domain.Cart_Line_Item;
+import pl.com.coders.shop2.domain.CartLineItem;
 import pl.com.coders.shop2.domain.Product;
 import pl.com.coders.shop2.domain.User;
 import pl.com.coders.shop2.domain.dto.CartDto;
@@ -24,12 +24,11 @@ public class CartService {
     private final UserRepository userRepository;
     private CartMapper cartMapper;
     private Cart cart;
-
+    private CartDto cartDto;
 
     public CartDto saveCart(String productTitle, int cartLineQuantity, BigDecimal cartLinePrize, String userEmail) {
         Optional<Product> productByNameOptional = productRepository.getProductByName(productTitle);
         if (productByNameOptional.isEmpty()) {
-            // to do
             return null;
         }
 
@@ -39,18 +38,24 @@ public class CartService {
         }
 
         Cart cart = cartRepository.getCartByUserId(user.getId());
-
-        Cart_Line_Item cartLineItem = Cart_Line_Item.builder()
-                .cart(cart)
-                .product(productByNameOptional.get())
-                .cartLineQuantity(cartLineQuantity)
-                .cartLinePrice(cartLinePrize)
-                .cartIndex(cart.getCartLineItems().size() + 1)
-                .build();
-
-        cartRepository.addToCartLineItem(cartLineItem);
+        Product product = productByNameOptional.orElse(null);
+        Optional<CartLineItem> existingCartItem = cart.getCartLineItems().stream()
+                .filter(item -> item.getProduct().equals(product))
+                .findFirst();
+        if (existingCartItem.isPresent()) {
+            existingCartItem.get().setCartLineQuantity(existingCartItem.get().getCartLineQuantity() + cartLineQuantity);
+            existingCartItem.get().setCartLinePrice(cartLinePrize);
+        } else {
+            CartLineItem cartLineItem = CartLineItem.builder()
+                    .cart(cart)
+                    .product(productByNameOptional.get())
+                    .cartLineQuantity(cartLineQuantity)
+                    .cartLinePrice(cartLinePrize)
+                    .cartIndex(cart.getCartLineItems().size() + 1)
+                    .build();
+            cartRepository.addToCartLineItem(cartLineItem);
+        }
         return cartMapper.cartToDto(cartRepository.saveCart(cart));
-
     }
 
     public CartDto getCartByCartId(Long cartId) {
@@ -61,6 +66,11 @@ public class CartService {
     public CartDto getCartByUserId(Long userId) {
         Cart cartByUserId = cartRepository.getCartByUserId(userId);
         return cartMapper.cartToDto(cartByUserId);
+    }
+
+    public CartDto getCartByUserEmail(String email) {
+        Cart cartByUserEmail = cartRepository.getCartByUserEmail(email);
+        return cartMapper.cartToDto(cartByUserEmail);
     }
 
     public boolean delete(Long cartId) {

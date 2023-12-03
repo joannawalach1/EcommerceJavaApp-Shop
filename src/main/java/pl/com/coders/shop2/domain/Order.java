@@ -32,7 +32,7 @@ public class Order {
     private User user;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
-    private Set<Order_Line_Item> orderLineItems = new HashSet<>();
+    private Set<OrderLineItem> orderLineItems = new HashSet<>();
 
     @CreationTimestamp
     private LocalDateTime created;
@@ -43,7 +43,7 @@ public class Order {
     public Order(User user1, double v) {
     }
 
-    public void addOrderLineItem(Order_Line_Item orderLineItem) {
+    public void addOrderLineItem(OrderLineItem orderLineItem) {
         orderLineItems.add(orderLineItem);
     }
 

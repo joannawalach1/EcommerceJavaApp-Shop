@@ -27,7 +27,7 @@ public class Cart {
     @JoinColumn(name = "user_id", unique = true, nullable = false)
     private User user;
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Cart_Line_Item> cartLineItems;
+    private List<CartLineItem> cartLineItems;
     @CreationTimestamp
     private LocalDateTime created;
     @UpdateTimestamp

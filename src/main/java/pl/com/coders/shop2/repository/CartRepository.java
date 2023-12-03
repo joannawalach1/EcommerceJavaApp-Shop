@@ -3,8 +3,7 @@ package pl.com.coders.shop2.repository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import pl.com.coders.shop2.domain.Cart;
-import pl.com.coders.shop2.domain.Cart_Line_Item;
-
+import pl.com.coders.shop2.domain.CartLineItem;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
@@ -71,7 +70,7 @@ public class CartRepository {
         return Math.toIntExact((Long) query.getSingleResult());
     }
 
-    public void addToCartLineItem(Cart_Line_Item cartLineItem) {
+    public void addToCartLineItem(CartLineItem cartLineItem) {
         Cart cart = entityManager.find(Cart.class, cartLineItem.getCart().getId());
         if (cart != null) {
             if (cart.getCartLineItems() == null) {
@@ -83,5 +82,12 @@ public class CartRepository {
 
             entityManager.merge(cart);
         }
+    }
+
+    public Cart getCartByUserEmail(String email) {
+        String jpql = "SELECT c FROM Cart c WHERE c.email = :email";
+        TypedQuery<Cart> query = entityManager.createQuery(jpql, Cart.class);
+        query.setParameter("email", email);
+        return query.getSingleResult();
     }
 }

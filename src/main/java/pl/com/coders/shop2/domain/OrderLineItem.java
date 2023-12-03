@@ -12,7 +12,7 @@ import javax.persistence.*;
 @AllArgsConstructor
 @EqualsAndHashCode
 @Builder
-public class Order_Line_Item {
+public class OrderLineItem {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
