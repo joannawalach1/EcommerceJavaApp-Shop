@@ -1,6 +1,7 @@
 package pl.com.coders.shop2.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pl.com.coders.shop2.domain.Cart;
 import pl.com.coders.shop2.domain.CartLineItem;
@@ -15,6 +16,7 @@ import pl.com.coders.shop2.repository.UserRepository;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +25,15 @@ public class CartService {
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private CartMapper cartMapper;
+    @Autowired
+    public CartService(CartRepository cartRepository, ProductRepository productRepository, UserRepository userRepository, CartMapper cartMapper) {
+        this.cartRepository = cartRepository;
+        this.productRepository = productRepository;
+        this.userRepository = userRepository;
+        this.cartMapper = cartMapper;
+    }
+
+
     private Cart cart;
     private CartDto cartDto;
 
@@ -88,7 +99,9 @@ public class CartService {
     }
 
     public List<CartDto> getAll() {
-        List<Cart> carts = cartRepository.getAll();
-        return cartMapper.cartToDto(carts);
+        return cartRepository.getAll().stream()
+                .map(cartMapper::cartToDto)
+                .collect(Collectors.toList());
     }
+
 }

@@ -1,7 +1,6 @@
 package pl.com.coders.shop2.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,8 +22,6 @@ import pl.com.coders.shop2.service.ProductService;
 
 import java.math.BigDecimal;
 
-import static net.bytebuddy.matcher.ElementMatchers.is;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -49,7 +46,6 @@ class ProductControllerTest {
     @MockBean
     private ProductService productService;
 
-    private Category category;
     private CategoryType categoryType;
     private ProductDto productDto;
     private Product product;
@@ -58,7 +54,7 @@ class ProductControllerTest {
     void setUp() {
         objectMapper = new ObjectMapper();
         categoryType = CategoryType.ELEKTRONIKA;
-        category = createSampleCategory();
+        Category category = createSampleCategory();
         productDto = createSampleDtoProduct(categoryType);
         when(productService.create(productDto)).thenReturn(productDto);
     }

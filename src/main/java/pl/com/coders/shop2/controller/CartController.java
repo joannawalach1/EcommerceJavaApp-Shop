@@ -24,14 +24,14 @@ public class CartController {
         return ResponseEntity.status(HttpStatus.OK).body(cartsByUserId);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<CartDto> findCartByCartId(@PathVariable Long cartId) {
+    @GetMapping("/cart/byId/{id}")
+    public ResponseEntity<CartDto> findCartByCartId(@RequestParam Long cartId) {
         CartDto cartsByCartId = cartService.getCartByCartId(cartId);
         return ResponseEntity.status(HttpStatus.OK).body(cartsByCartId);
     }
 
-    @GetMapping("/cart/{email}")
-    public ResponseEntity<CartDto> getCartsByUserEmail(@PathVariable String email) {
+    @GetMapping("/cart/byEmail")
+    public ResponseEntity<CartDto> getCartsByUserEmail(@RequestParam String email) {
         CartDto cartsByUserEmail = cartService.getCartByUserEmail(email);
         return ResponseEntity.status(HttpStatus.OK).body(cartsByUserEmail);
     }

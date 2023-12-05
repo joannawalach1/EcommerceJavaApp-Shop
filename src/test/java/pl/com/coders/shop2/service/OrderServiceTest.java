@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import pl.com.coders.shop2.domain.Order;
 import pl.com.coders.shop2.domain.User;
+import pl.com.coders.shop2.domain.dto.OrderDto;
 import pl.com.coders.shop2.repository.OrderRepository;
 import pl.com.coders.shop2.repository.UserRepository;
 import java.util.Arrays;
@@ -40,19 +41,19 @@ class OrderServiceTest {
     void findOrdersByUserId() {
         Long userId = 1L;
         when(orderRepository.findOrdersByUserId(any())).thenReturn(orders);
-        List<Order> foundOrders = orderService.findOrdersByUserId(userId);
+        List<OrderDto> foundOrders = orderService.findOrdersByUserId(userId);
         assertNotNull(foundOrders);
         assertEquals(orders, foundOrders);
         verify(orderRepository, times(1)).findOrdersByUserId(userId);
     }
 
     @Test
-    void findOrdersById() {
+    void findOrderById() {
         UUID orderId = UUID.fromString("a0a1ab07-d158-4e89-8b42-2fd8c677147f");
         when(orderRepository.findOrdersById(orderId)).thenReturn(orders);
-        List<Order> foundOrders = orderService.findOrdersById(orderId);
-        assertNotNull(foundOrders);
-        assertEquals(orders, foundOrders);
+        List<OrderDto> foundOrder = orderService.findOrderById(orderId);
+        assertNotNull(foundOrder);
+        assertEquals(orders, foundOrder);
         verify(orderRepository, times(1)).findOrdersById(orderId);
     }
 

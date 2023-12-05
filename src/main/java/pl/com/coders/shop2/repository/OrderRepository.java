@@ -3,6 +3,7 @@ package pl.com.coders.shop2.repository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import pl.com.coders.shop2.domain.Order;
+import pl.com.coders.shop2.domain.OrderLineItem;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -48,4 +49,7 @@ public class OrderRepository {
         TypedQuery<Order> query = entityManager.createQuery("SELECT o FROM Order o", Order.class);
         return query.getResultList();
     }
+
+
+
 }

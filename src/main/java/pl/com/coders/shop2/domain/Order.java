@@ -17,14 +17,12 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
 @Builder
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "order_id", columnDefinition = "uuid", updatable = false)
     private UUID id;
-
     private BigDecimal totalAmount;
 
     @ManyToOne

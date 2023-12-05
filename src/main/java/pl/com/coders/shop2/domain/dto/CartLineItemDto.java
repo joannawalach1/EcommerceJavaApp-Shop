@@ -9,7 +9,6 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Builder
 @ToString
-@EqualsAndHashCode()
 public class CartLineItemDto {
     private String productTitle;
     private int cartLineQuantity;

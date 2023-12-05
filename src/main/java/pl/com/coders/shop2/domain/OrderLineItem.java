@@ -10,7 +10,6 @@ import javax.persistence.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
 @Builder
 public class OrderLineItem {
     @Id
@@ -24,6 +23,5 @@ public class OrderLineItem {
     @ManyToOne
     @JoinColumn(name = "product_id")
     private Product product;
-
     private int quantity;
 }

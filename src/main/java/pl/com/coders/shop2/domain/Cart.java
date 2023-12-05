@@ -8,6 +8,7 @@ import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "carts")
@@ -15,7 +16,6 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
 @Builder
 public class Cart {
     @Id
@@ -26,8 +26,8 @@ public class Cart {
     @OneToOne
     @JoinColumn(name = "user_id", unique = true, nullable = false)
     private User user;
-    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CartLineItem> cartLineItems;
+    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private Set<CartLineItem> cartLineItems;
     @CreationTimestamp
     private LocalDateTime created;
     @UpdateTimestamp

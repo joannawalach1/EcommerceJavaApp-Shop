@@ -21,7 +21,6 @@ public class UserRepository {
         TypedQuery<User> query = entityManager.createQuery(
                 "SELECT u FROM User u WHERE u.email = :email", User.class);
         query.setParameter("email", email);
-
         return query.getSingleResult();
     }
 }

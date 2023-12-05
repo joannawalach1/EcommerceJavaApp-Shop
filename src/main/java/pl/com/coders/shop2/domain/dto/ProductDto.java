@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @ToString
-@EqualsAndHashCode(of = {"id"})
 
 public class ProductDto {
 

@@ -7,15 +7,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import pl.com.coders.shop2.domain.Category;
 import pl.com.coders.shop2.domain.CategoryType;
 import pl.com.coders.shop2.domain.Product;
-import pl.com.coders.shop2.domain.dto.ProductDto;
 import pl.com.coders.shop2.exceptions.ProductWithGivenIdNotExistsException;
-import pl.com.coders.shop2.exceptions.ProductWithGivenTitleExistsException;
 import pl.com.coders.shop2.exceptions.ProductWithGivenTitleNotExistsException;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;

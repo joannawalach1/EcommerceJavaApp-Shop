@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.com.coders.shop2.domain.Order;
+import pl.com.coders.shop2.domain.dto.OrderDto;
 import pl.com.coders.shop2.service.OrderService;
 
 import java.util.List;
@@ -20,20 +21,20 @@ public class OrderController {
     }
 
     @GetMapping("/user/{id}")
-    public ResponseEntity<List<Order>> getOrdersByUserId(@PathVariable Long id) {
-        List<Order> ordersByUserId = orderService.findOrdersByUserId(id);
-        return ResponseEntity.status(HttpStatus.OK).body(ordersByUserId);
+    public ResponseEntity<List<OrderDto>> getOrdersByUserId(@PathVariable Long id) {
+        List<OrderDto> orderByUserId = orderService.findOrdersByUserId(id);
+        return ResponseEntity.status(HttpStatus.OK).body(orderByUserId);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<List<Order>> findOrdersByOrderId(@PathVariable UUID id) {
-        List<Order> ordersByOrderId = orderService.findOrdersById(id);
+    public ResponseEntity<List<OrderDto>> findOrderByOrderId(@PathVariable UUID id) {
+        List<OrderDto> ordersByOrderId = orderService.findOrderById(id);
         return ResponseEntity.status(HttpStatus.OK).body(ordersByOrderId);
     }
 
     @PostMapping
-    public ResponseEntity<Order> saveOrder(@RequestBody Order order) {
-        Order createdOrder = orderService.saveOrder(order);
+    public ResponseEntity<OrderDto> saveOrder(@RequestBody OrderDto orderDto) {
+        OrderDto createdOrder = orderService.saveOrder(orderDto);
         return ResponseEntity.status(HttpStatus.OK).body(createdOrder);
     }
 
