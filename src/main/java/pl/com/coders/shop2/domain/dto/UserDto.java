@@ -2,7 +2,8 @@ package pl.com.coders.shop2.domain.dto;
 
 import lombok.*;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

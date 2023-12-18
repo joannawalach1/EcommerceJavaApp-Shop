@@ -15,15 +15,12 @@ import java.math.BigDecimal;
 public class CartLineItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "line_item_id")
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "cart_id", nullable = false)
     private Cart cart;
 
     @ManyToOne
-    @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
     private int cartLineQuantity;

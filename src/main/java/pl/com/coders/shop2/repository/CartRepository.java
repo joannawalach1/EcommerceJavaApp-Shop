@@ -1,41 +1,60 @@
 package pl.com.coders.shop2.repository;
 
-import org.hibernate.mapping.Set;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import pl.com.coders.shop2.domain.Cart;
-import pl.com.coders.shop2.domain.CartLineItem;
+import pl.com.coders.shop2.domain.Product;
+import pl.com.coders.shop2.domain.User;
+
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 
 @Transactional
 @Repository
 public class CartRepository {
     @PersistenceContext
-    private EntityManager entityManager;
+    private final EntityManager entityManager;
+    private final UserRepository userRepository;
+    private final ProductRepository productRepository;
 
-    public CartRepository(EntityManager entityManager) {
+    public CartRepository(EntityManager entityManager, UserRepository userRepository, ProductRepository productRepository, ProductRepository productRepository1) {
         this.entityManager = entityManager;
+        this.userRepository = userRepository;
+        this.productRepository = productRepository1;
     }
 
-    public Cart saveCart(Cart cart) {
-        entityManager.persist(cart);
+    public Cart createCart(String userEmail, String productTitle) {
+        User user = userRepository.findByEmail(userEmail);
+        Optional<Product> product = productRepository.getProductByName(productTitle);
+        if (user == null) {
+            throw new IllegalArgumentException("User not found for email: " + userEmail);
+        }
+        Cart cart = user.getCart();
+        if (cart != null) {
+            throw new IllegalArgumentException("User cart exists: " + cart);
+        } else {
+            cart = new Cart();
+            cart.setUser(user);
+            cart.setTotalPrice(product.get().getPrice());
+            cart.setCreated(LocalDateTime.now());
+            cart.setUpdated(LocalDateTime.now());
+        }
+        entityManager.merge(cart);
         return cart;
     }
 
     public Cart getCartByCartId(Long cartId) {
-//        String jpql = "SELECT c FROM Cart c WHERE c.id = :cartId";
-//        TypedQuery<Cart> query = entityManager.createQuery(jpql, Cart.class);
-//        query.setParameter("cartId", cartId);
-//        return query.getSingleResult();
-            return entityManager.find(Cart.class, cartId);
+        String jpql = "SELECT c FROM Cart c WHERE c.id = :cartId";
+        TypedQuery<Cart> query = entityManager.createQuery(jpql, Cart.class);
+        query.setParameter("cartId", cartId);
+        return query.getSingleResult();
     }
+
 
     public Cart getCartByUserId(Long userId) {
         String jpql = "SELECT c FROM Cart c WHERE c.user.id = :userId";
@@ -44,8 +63,15 @@ public class CartRepository {
         return query.getSingleResult();
     }
 
+    public Cart getCartByUserEmail(String email) {
+        String jpql = "SELECT c FROM Cart c WHERE c.user.email = :email";
+        TypedQuery<Cart> query = entityManager.createQuery(jpql, Cart.class);
+        query.setParameter("email", email);
+        return query.getSingleResult();
+    }
+
     public boolean deleteCartByCartId(Long cartId) {
-        Query query = entityManager.createQuery("DELETE FROM Cart c WHERE c.id = :orderId");
+        Query query = entityManager.createQuery("DELETE FROM Cart c WHERE c.id = :cartId");
         query.setParameter("cartId", cartId);
         return true;
     }
@@ -73,24 +99,13 @@ public class CartRepository {
         return Math.toIntExact((Long) query.getSingleResult());
     }
 
-    public void addToCartLineItem(CartLineItem cartLineItem) {
-        Cart cart = entityManager.find(Cart.class, cartLineItem.getCart().getId());
-        if (cart != null) {
-            if (cart.getCartLineItems() == null) {
-                cart.setCartLineItems(new HashSet<>());
-            }
-
-            cart.getCartLineItems().add(cartLineItem);
-            cartLineItem.setCart(cart);
-
-            entityManager.merge(cart);
-        }
+    public boolean deleteByCartIndex(Long cartId, int cartIndex) {
+        Query query = entityManager.createQuery("DELETE FROM Cart c WHERE c.id = :cartId AND c.cartIndex = :cartIndex");
+        query.setParameter("cartId", cartId);
+        query.setParameter("cartIndex", cartIndex);
+        int deletedCount = query.executeUpdate();
+        return deletedCount > 0;
     }
 
-    public Cart getCartByUserEmail(String email) {
-        String jpql = "SELECT c FROM Cart c JOIN c.user u WHERE u.email = :email";
-        TypedQuery<Cart> query = entityManager.createQuery(jpql, Cart.class);
-        query.setParameter("email", email);
-        return query.getSingleResult();
-    }
 }
+

@@ -12,6 +12,8 @@ import pl.com.coders.shop2.repository.ProductRepository;
 
 import java.util.List;
 
+import static java.lang.System.*;
+
 @Service
 @AllArgsConstructor
 public class ProductService {
@@ -22,7 +24,7 @@ public class ProductService {
 
     public ProductDto create(ProductDto productDto) {
         Long categoryId = productDto.getCategoryType().getId();
-        System.out.println("Category ID: " + categoryId);
+        out.println("Category ID: " + categoryId);
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new IllegalArgumentException("Category not found with ID: " + categoryId));
 
@@ -34,8 +36,7 @@ public class ProductService {
     }
 
     public ProductDto get(Long id) {
-        ProductDto productDto = productMapper.productToDto(productRepository.getProductById(id));
-        return productDto;
+        return productMapper.productToDto(productRepository.getProductById(id));
     }
 
     public boolean delete(Long id) {
@@ -50,8 +51,9 @@ public class ProductService {
         return productMapper.productToDto(update);
     }
 
-    public List<Product> getAllProd() {
-        return productRepository.findAllProd();
+    public List<ProductDto> getAllProd() {
+        List<Product> products = productRepository.findAllProd();
+        return  productMapper.productsToDtos(products);
     }
 
 }

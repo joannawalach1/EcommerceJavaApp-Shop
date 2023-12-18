@@ -3,14 +3,15 @@ package pl.com.coders.shop2.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pl.com.coders.shop2.domain.dto.ProductDto;
 import pl.com.coders.shop2.domain.dto.UserDto;
 import pl.com.coders.shop2.service.UserService;
+
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/user")
 public class UserController {
-    private UserService userService;
+    private final UserService userService;
 
     public UserController(UserService userService) {
         this.userService = userService;
@@ -23,8 +24,8 @@ public class UserController {
     }
 
     @GetMapping("/{email}")
-    public ResponseEntity<UserDto> findByEmail(@PathVariable String email) {
-        UserDto foundUser = userService.findByEmail(email);
-        return ResponseEntity.status(HttpStatus.OK).body(foundUser);
+    public ResponseEntity<Optional<UserDto>> findByEmail(@PathVariable String email) {
+        Optional<UserDto> user = userService.findByEmail(email);
+        return ResponseEntity.status(HttpStatus.OK).body(user);
     }
 }

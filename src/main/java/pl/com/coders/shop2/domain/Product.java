@@ -1,13 +1,11 @@
 package pl.com.coders.shop2.domain;
 
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -16,15 +14,14 @@ import java.util.Set;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@SuperBuilder
+@EqualsAndHashCode
+@Builder
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "product_id")
     private Long id;
 
     @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REMOVE})
-    @JoinColumn(name = "category_id")
     private Category category;
 
     private String name;
@@ -33,7 +30,10 @@ public class Product {
     private int quantity;
 
     @OneToMany(mappedBy = "product")
-    private Set<OrderLineItem> orderLineItems = new HashSet<>();
+    private Set<OrderLineItem> orderLineItems;
+
+    @OneToMany(mappedBy = "product")
+    private Set<CartLineItem> cartLineItem;
 
     @CreationTimestamp
     private LocalDateTime created;

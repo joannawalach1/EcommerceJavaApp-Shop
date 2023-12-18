@@ -7,7 +7,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -16,15 +15,16 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode
 @Builder
 public class Cart {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "cart_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
     private BigDecimal totalPrice;
     @OneToOne
-    @JoinColumn(name = "user_id", unique = true, nullable = false)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<CartLineItem> cartLineItems;
@@ -33,4 +33,8 @@ public class Cart {
     @UpdateTimestamp
     private LocalDateTime updated;
 
-}
+    public void addCartLineItem(CartLineItem cartLineItem) {
+            cartLineItems.add(cartLineItem);
+            cartLineItem.setCart(this);
+        }
+    }

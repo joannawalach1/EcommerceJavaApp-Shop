@@ -4,7 +4,6 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.Set;
-import java.util.UUID;
 
 @Data
     @NoArgsConstructor
@@ -15,5 +14,6 @@ import java.util.UUID;
     private String userLastName;
     private BigDecimal totalAmount;
     private Set<OrderLineItemDto> orderLineDtoItems;
+
 }
 

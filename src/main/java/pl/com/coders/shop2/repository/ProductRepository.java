@@ -18,13 +18,13 @@ import java.util.Optional;
 @Repository
 public class ProductRepository {
     @PersistenceContext
-    private EntityManager entityManager;
+    private final EntityManager entityManager;
 
     public ProductRepository(EntityManager entityManager) {
         this.entityManager = entityManager;
     }
 
-    @Transactional(rollbackFor = ProductWithGivenTitleExistsException.class)
+    @Transactional()
     public Product add(Product product) throws ProductWithGivenTitleExistsException {
         if (getProductByName(product.getName()).isPresent()) {
             throw new ProductWithGivenTitleExistsException("Product with the given title already exists.");
@@ -89,10 +89,13 @@ public class ProductRepository {
         entityManager.createQuery("DELETE FROM Product").executeUpdate();
     }
 
+    @Transactional
     public Optional<Product> getProductByName(String name) {
         String jpql = "SELECT p FROM Product p WHERE p.name = :name";
-        TypedQuery<Product> query = entityManager.createQuery(jpql, Product.class)
-                .setParameter("name", name);
-        return query.getResultStream().findFirst();
+        TypedQuery<Product> query = entityManager.createQuery(jpql, Product.class);
+        query.setParameter("name", name);
+        List<Product> resultList = query.getResultList();
+        return resultList.isEmpty() ? Optional.empty() : Optional.of(resultList.get(0));
     }
+
 }

@@ -14,7 +14,7 @@
 #      hibernate:
 #        dialect: org.hibernate.dialect.PostgreSQL92Dialect
 #    hibernate:
-#      ddl-auto: update
+#      ddl-auto: create
 #  mvc:
 #    pathmatch:
 #      matching-strategy: ANT_PATH_MATCHER

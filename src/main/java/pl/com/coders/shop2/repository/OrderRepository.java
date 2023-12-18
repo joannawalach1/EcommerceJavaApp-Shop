@@ -3,7 +3,7 @@ package pl.com.coders.shop2.repository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import pl.com.coders.shop2.domain.Order;
-import pl.com.coders.shop2.domain.OrderLineItem;
+import pl.com.coders.shop2.domain.User;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -17,8 +17,13 @@ import java.util.UUID;
 public class OrderRepository {
 
     @PersistenceContext
-    private EntityManager entityManager;
+    private final EntityManager entityManager;
+    private final UserRepository userRepository;
 
+    public OrderRepository(EntityManager entityManager, UserRepository userRepository) {
+        this.entityManager = entityManager;
+        this.userRepository = userRepository;
+    }
 
     public List<Order> findOrdersByUserId(Long userId) {
         String jpql = "SELECT o FROM Order o WHERE o.user.id = :userId";
@@ -35,21 +40,22 @@ public class OrderRepository {
     }
 
     public Order saveOrder(Order order) {
-        entityManager.persist(order);
+        User savedUser = userRepository.create(order.getUser());
+        order.setUser(savedUser);
+        entityManager.merge(order);
         return order;
     }
 
     public boolean delete(UUID orderId) {
-        Query query = entityManager.createQuery("DELETE FROM Order p WHERE p.id = :orderId");
+        Query query = entityManager.createQuery("DELETE FROM Order o WHERE o.id = :orderId");
         query.setParameter("orderId", orderId);
-        return true;
+        int deletedCount = query.executeUpdate();
+        return deletedCount > 0;
     }
 
     public List<Order> findAllOrders() {
-        TypedQuery<Order> query = entityManager.createQuery("SELECT o FROM Order o", Order.class);
-        return query.getResultList();
+            TypedQuery<Order> query = entityManager.createQuery("SELECT o FROM Order o", Order.class);
+            return query.getResultList();
+        }
     }
 
-
-
-}

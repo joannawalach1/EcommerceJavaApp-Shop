@@ -3,7 +3,6 @@ package pl.com.coders.shop2.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pl.com.coders.shop2.domain.Product;
 import pl.com.coders.shop2.domain.dto.ProductDto;
 import pl.com.coders.shop2.service.ProductService;
 
@@ -44,8 +43,8 @@ public class ProductController {
     }
 
     @GetMapping("/getProduct")
-    public ResponseEntity<List<Product>> getAllProd() {
-        List<Product> productList = productService.getAllProd();
-        return ResponseEntity.ok(productList);
+    public ResponseEntity<List<ProductDto>> getAllProd() {
+        List<ProductDto> productList = productService.getAllProd();
+        return ResponseEntity.status(HttpStatus.OK).body(productList);
     }
 }

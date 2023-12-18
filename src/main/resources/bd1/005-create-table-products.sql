@@ -1,5 +1,5 @@
 CREATE TABLE products (
-product_id BIGSERIAL PRIMARY KEY NOT NULL,
+id BIGSERIAL PRIMARY KEY NOT NULL,
 name TEXT,
 description TEXT,
 price NUMERIC(19,2),

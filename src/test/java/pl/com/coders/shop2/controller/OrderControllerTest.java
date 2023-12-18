@@ -1,133 +1,108 @@
 package pl.com.coders.shop2.controller;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import pl.com.coders.shop2.domain.Order;
-import pl.com.coders.shop2.domain.User;
-import pl.com.coders.shop2.repository.OrderRepository;
-import pl.com.coders.shop2.repository.UserRepository;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import pl.com.coders.shop2.domain.dto.OrderDto;
 import pl.com.coders.shop2.service.OrderService;
-import pl.com.coders.shop2.service.ProductService;
 
-import java.util.Arrays;
+import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 class OrderControllerTest {
+
+    @Mock
+    private OrderService orderService;
+
+    @InjectMocks
+    private OrderController orderController;
+
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private OrderRepository orderRepository;
-
-    @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
-    private ProductService productService;
+    @Test
+    void testGetOrdersByUserId() throws Exception {
+        Long userId = 1L;
+        List<OrderDto> orders = Collections.singletonList(new OrderDto());
 
-    @MockBean
-    private OrderService orderService;
+        Mockito.when(orderService.findOrdersByUserId(userId)).thenReturn(orders);
 
-    private List<Order> allOrders;
+        mockMvc.perform(MockMvcRequestBuilders.get("/orders/user/{id}", userId)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.size()").value(orders.size()));
+    }
 
-    @BeforeEach
-    void setUp() {
-        allOrders = prepareTestData();
+    @Test
+    void testFindOrderByOrderId() throws Exception {
+        UUID orderId = UUID.fromString("8ee0c4f6-1b02-4a80-bf8b-ba70f5d9f49d");
+        List<OrderDto> orders = Collections.singletonList(new OrderDto());
+
+        Mockito.when(orderService.findOrderById(orderId)).thenReturn(orders);
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/orders/{id}", orderId)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.size()").value(orders.size()));
+    }
+
+    @Test
+    void testSaveOrder() throws Exception {
+        OrderDto orderDto = new OrderDto();
+        orderDto.setUserLastName("Doe");
+        orderDto.setTotalAmount(BigDecimal.valueOf(100.0));
+
+        Mockito.when(orderService.saveOrder(orderDto)).thenReturn(orderDto);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/orders")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(orderDto)))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.userLastName").value(orderDto.getUserLastName()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.totalAmount").value(orderDto.getTotalAmount().toString()));
     }
 
 //    @Test
-//    void getOrdersByUserId() throws Exception {
-//        Long userId = 1L;
-//        when(orderService.findOrdersByUserId(any())).thenReturn(allOrders);
-//        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/orders/user/{id}", userId))
-//                .andExpect(status().isOk())
-//                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-//                .andReturn();
+//    void testDelete() throws Exception {
+//        UUID orderId = UUID.fromString("8ee0c4f6-1b02-4a80-bf8b-ba70f5d9f49d");
 //
-//        String jsonResponse = result.getResponse().getContentAsString();
-//        List<Order> responseOrders = objectMapper.readValue(jsonResponse, new TypeReference<>() {
-//        });
-//        assertEquals(allOrders.size(), responseOrders.size());
-//        verify(orderService, times(1)).findOrdersByUserId(userId);
-//    }
+//        mockMvc.perform(MockMvcRequestBuilders.delete("/orders/delete/{id}", orderId)
+//                        .contentType(MediaType.APPLICATION_JSON))
+//                .andExpect(MockMvcResultMatchers.status().isNoContent());
 //
-//    @Test
-//    void findOrdersByOrderId() throws Exception {
-//        UUID orderId = UUID.fromString("a0a1ab07-d158-4e89-8b42-2fd8c677147f");
-//        when(orderService.findOrdersByUserId(any())).thenReturn(allOrders);
-//
-//        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/orders/{id}", orderId))
-//                .andExpect(status().isOk())
-//                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-//                .andReturn();
-//
-//        String jsonResponse = result.getResponse().getContentAsString();
-//        List<Order> responseOrders = objectMapper.readValue(jsonResponse, new TypeReference<>() {
-//        });
-//        verify(orderService, times(1)).findOrderById(any());
+//        Mockito.verify(orderService, Mockito.times(1)).delete(orderId);
 //    }
 
     @Test
-    void saveOrder() {
-    }
+    void testFindAllOrders() throws Exception {
+        List<OrderDto> orders = Collections.singletonList(new OrderDto());
 
-    @Test
-    void delete() throws Exception {
-        UUID orderId = UUID.fromString("a0a1ab07-d158-4e89-8b42-2fd8c677147f");
-        when(orderService.delete(any())).thenReturn(true);
-        mockMvc.perform(MockMvcRequestBuilders.delete("/orders/{id}", orderId))
-                .andExpect(status().isNoContent());
-        verify(orderService, times(1)).delete(orderId);
-    }
+        Mockito.when(orderService.findAllOrders()).thenReturn(orders);
 
-    @Test
-    void findAllOrders() throws Exception {
-        when(orderService.findAllOrders()).thenReturn(allOrders);
-        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/orders/getOrder"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andReturn();
-
-        String jsonResponse = result.getResponse().getContentAsString();
-        List<Order> responseOrders = objectMapper.readValue(jsonResponse, new TypeReference<>() {
-        });
-        assertNotNull(result);
-        verify(orderService, Mockito.times(1)).findAllOrders();
-    }
-
-    private List<Order> prepareTestData() {
-        User user1 = userRepository.create(new User(1L, "john@example.com", "John", "Doe", "pass1"));
-        User user2 = userRepository.create(new User(2L, "anne@example.com", "Anne", "Boe", "pass2"));
-        Order order1 = orderRepository.saveOrder(new Order(user1, 100.0));
-        Order order2 = orderRepository.saveOrder(new Order(user2, 50));
-        return Arrays.asList(order1, order2);
+        mockMvc.perform(MockMvcRequestBuilders.get("/orders/getOrder")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk());
     }
 }

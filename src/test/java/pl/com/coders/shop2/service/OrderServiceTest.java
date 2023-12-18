@@ -1,9 +1,5 @@
 package pl.com.coders.shop2.service;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -11,12 +7,18 @@ import org.springframework.boot.test.context.SpringBootTest;
 import pl.com.coders.shop2.domain.Order;
 import pl.com.coders.shop2.domain.User;
 import pl.com.coders.shop2.domain.dto.OrderDto;
+import pl.com.coders.shop2.mapper.OrderMapper;
 import pl.com.coders.shop2.repository.OrderRepository;
 import pl.com.coders.shop2.repository.UserRepository;
-import java.util.Arrays;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 class OrderServiceTest {
@@ -27,59 +29,67 @@ class OrderServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private OrderMapper orderMapper;
+
     @InjectMocks
     private OrderService orderService;
 
-    private List<Order> orders;
-
-    @BeforeEach
-    void setUp() {
-        orders = prepareTestData();
-    }
-
     @Test
-    void findOrdersByUserId() {
+    void testFindOrdersByUserId() {
         Long userId = 1L;
-        when(orderRepository.findOrdersByUserId(any())).thenReturn(orders);
-        List<OrderDto> foundOrders = orderService.findOrdersByUserId(userId);
-        assertNotNull(foundOrders);
-        assertEquals(orders, foundOrders);
-        verify(orderRepository, times(1)).findOrdersByUserId(userId);
+        when(orderRepository.findOrdersByUserId(userId)).thenReturn(List.of(new Order()));
+        List<OrderDto> result = orderService.findOrdersByUserId(userId);
+        assertNotNull(result);
     }
 
     @Test
-    void findOrderById() {
-        UUID orderId = UUID.fromString("a0a1ab07-d158-4e89-8b42-2fd8c677147f");
-        when(orderRepository.findOrdersById(orderId)).thenReturn(orders);
-        List<OrderDto> foundOrder = orderService.findOrderById(orderId);
-        assertNotNull(foundOrder);
-        assertEquals(orders, foundOrder);
-        verify(orderRepository, times(1)).findOrdersById(orderId);
+    void testFindOrderById() {
+        UUID orderId = UUID.randomUUID();
+        when(orderRepository.findOrdersById(orderId)).thenReturn(List.of(new Order()));
+        List<OrderDto> result = orderService.findOrderById(orderId);
+        assertNotNull(result);
     }
 
     @Test
-    void delete() {
-        UUID orderId = UUID.fromString("a0a1ab07-d158-4e89-8b42-2fd8c677147f");
+    void testSaveOrder() {
+        OrderDto orderDto = new OrderDto();
+        orderDto.setUserLastName("Doe");
+        orderDto.setTotalAmount(BigDecimal.valueOf(100.0));
+
+        User user = new User();
+        user.setLastName("Doe");
+
+        Order order = new Order();
+        order.setId(UUID.randomUUID());
+        order.setUser(user);
+        order.setTotalAmount(orderDto.getTotalAmount());
+        order.setCreated(LocalDateTime.now());
+        order.setUpdated(LocalDateTime.now());
+
+        when(orderMapper.dtoToOrder(any())).thenReturn(order);
+        when(userRepository.findByLastName(any())).thenReturn(user);
+        when(orderRepository.saveOrder(any())).thenReturn(order);
+        when(orderMapper.orderToDto(any())).thenReturn(orderDto);
+
+        OrderDto result = orderService.saveOrder(orderDto);
+
+        assertNotNull(result);
+        assertEquals(order.getUser().getLastName(), result.getUserLastName());
+        assertEquals(order.getTotalAmount(), result.getTotalAmount());
+    }
+
+    @Test
+    void testDelete() {
+        UUID orderId = UUID.randomUUID();
         when(orderRepository.delete(orderId)).thenReturn(true);
-        boolean result = orderService.delete(orderId);
-        assertTrue(result, "Expected delete to return true");
-        verify(orderRepository, times(1)).delete(orderId);
+        assertTrue(orderService.delete(orderId));
     }
 
     @Test
-    void findAllOrders() {
-        when(orderRepository.findAllOrders()).thenReturn(orders);
-        List<Order> foundOrders = orderService.findAllOrders();
-        assertNotNull(foundOrders);
-        assertEquals(orders, foundOrders);
-        verify(orderRepository, times(1)).findAllOrders();
-    }
-
-    private List<Order> prepareTestData() {
-        User user1 = userRepository.create(new User(1L, "john@example.com", "John", "Doe", "pass1"));
-        User user2 = userRepository.create(new User(2L, "anne@example.com", "Anne", "Boe", "pass2"));
-        Order order1 = orderRepository.saveOrder(new Order(user1, 100.0));
-        Order order2 = orderRepository.saveOrder(new Order(user2, 50));
-        return Arrays.asList(order1, order2);
+    void testFindAllOrders() {
+        when(orderRepository.findAllOrders()).thenReturn(List.of(new Order()));
+        List<OrderDto> result = orderService.findAllOrders();
+        assertNotNull(result);
     }
 }

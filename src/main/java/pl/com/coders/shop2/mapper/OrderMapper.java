@@ -3,7 +3,6 @@ package pl.com.coders.shop2.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
-import org.mapstruct.factory.Mappers;
 import pl.com.coders.shop2.domain.Order;
 import pl.com.coders.shop2.domain.User;
 import pl.com.coders.shop2.domain.dto.OrderDto;
@@ -12,7 +11,7 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface OrderMapper {
-    OrderMapper INSTANCE = Mappers.getMapper(OrderMapper.class);
+    //OrderMapper INSTANCE = Mappers.getMapper(OrderMapper.class);
 
     @Mapping(source = "user", target = "userLastName", qualifiedByName = "mapUserToLastName")
     OrderDto orderToDto(Order order);
@@ -32,7 +31,5 @@ public interface OrderMapper {
         return user;
     }
 
-    List<OrderDto> ordersToDto(List<Order> ordersByUserId);
+    List<OrderDto> ordersToDtos(List<Order> allOrders);
 }
-
-

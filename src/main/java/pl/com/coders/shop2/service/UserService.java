@@ -7,6 +7,9 @@ import pl.com.coders.shop2.domain.dto.UserDto;
 import pl.com.coders.shop2.mapper.UserMapper;
 import pl.com.coders.shop2.repository.UserRepository;
 
+import java.time.LocalDateTime;
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -16,10 +19,15 @@ public class UserService {
     public UserDto create(UserDto userDto) {
         User user = userMapper.dtoToUser(userDto);
         User savedUser = userRepository.create(user);
+        savedUser.setCreated(LocalDateTime.now());
+        savedUser.setUpdated(LocalDateTime.now());
         return userMapper.userToDto(savedUser);
     }
 
-    public UserDto findByEmail(String email) {
-        return userMapper.userToDto(userRepository.findByEmail(email));
+    public Optional<UserDto> findByEmail(String email) {
+        return Optional.ofNullable(userRepository.findByEmail(email))
+                .map(userMapper::userToDto);
     }
+
+
 }

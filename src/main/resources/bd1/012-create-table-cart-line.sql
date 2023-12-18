@@ -1,5 +1,5 @@
 create table cart_line_item (
-line_item_id BIGSERIAL PRIMARY KEY NOT NULL,
+id BIGSERIAL PRIMARY KEY NOT NULL,
 cart_index INT,
 cart_line_price NUMERIC(15, 2),
 cart_line_quantity INT NOT NULL,

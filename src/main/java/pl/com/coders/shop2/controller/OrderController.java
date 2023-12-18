@@ -3,7 +3,6 @@ package pl.com.coders.shop2.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pl.com.coders.shop2.domain.Order;
 import pl.com.coders.shop2.domain.dto.OrderDto;
 import pl.com.coders.shop2.service.OrderService;
 
@@ -38,15 +37,15 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.OK).body(createdOrder);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         orderService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/getOrder")
-    public ResponseEntity<List<Order>> findAllOrders() {
-        List<Order> allOrders = orderService.findAllOrders();
+    public ResponseEntity<List<OrderDto>> findAllOrders() {
+        List<OrderDto> allOrders = orderService.findAllOrders();
         return ResponseEntity.status(HttpStatus.OK).body(allOrders);
     }
 }

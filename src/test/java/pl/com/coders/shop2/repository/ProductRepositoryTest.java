@@ -60,7 +60,7 @@ class ProductRepositoryTest {
 //    void shouldDeleteProductFromRepository() {
 //        Long productIdToDelete = 2L;
 //        Product found = productRepository.getProductById(productIdToDelete);
-//        boolean deletedProduct = productRepository.delete(productIdToDelete);
+//        boolean deletedProduct = productRepository.delete(2L);
 //        assertTrue(deletedProduct);
 //    }
 
@@ -112,6 +112,5 @@ class ProductRepositoryTest {
                 .name("Books")
                 .build();
     }
-
 }
 

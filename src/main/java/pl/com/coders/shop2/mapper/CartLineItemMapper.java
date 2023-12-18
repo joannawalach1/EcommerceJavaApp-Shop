@@ -7,19 +7,21 @@ import org.mapstruct.factory.Mappers;
 import pl.com.coders.shop2.domain.CartLineItem;
 import pl.com.coders.shop2.domain.dto.CartLineItemDto;
 
-@Mapper(componentModel = "spring")
+import java.util.Optional;
+
+@Mapper(componentModel = "spring", uses = ProductMapper.class)
 public interface CartLineItemMapper {
 
-    ProductMapper INSTANCE = Mappers.getMapper(ProductMapper.class);
+    CartLineItemMapper INSTANCE = Mappers.getMapper(CartLineItemMapper.class);
 
     @Mapping(source = "cartLineItem", target = "productTitle", qualifiedByName = "mapCartLineItemToProductTitle")
-    CartLineItemDto cartLineItemToDto(CartLineItem cartLineItem);
+    CartLineItemDto cartLineItemToDto(Optional<CartLineItem> cartLineItem);
 
-   // @Mapping(source = "categoryType", target = "category.name")
     CartLineItem dtoToCartLineItem(CartLineItemDto cartLineItemDto);
 
     @Named("mapCartLineItemToProductTitle")
-    default String mapCartLineItemToProductTitle(CartLineItem cartLineItem) {
-        return cartLineItem.getProduct().getName();
+    default String mapCartLineItemToProductTitle(Optional<CartLineItem> cartLineItem) {
+        return cartLineItem.map(item -> item.getProduct().getName()).orElse(null);
     }
 }
+
