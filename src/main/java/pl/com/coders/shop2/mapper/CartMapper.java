@@ -5,7 +5,9 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
 import pl.com.coders.shop2.domain.Cart;
+import pl.com.coders.shop2.domain.CartLineItem;
 import pl.com.coders.shop2.domain.dto.CartDto;
+import pl.com.coders.shop2.domain.dto.CartLineItemDto;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,4 +31,6 @@ public interface CartMapper {
     }
 
     List<CartDto> cartToDto(List<CartDto> carts);
+
+    CartLineItemDto cartLineItemToDto(CartLineItemDto cartItemDto);
 }

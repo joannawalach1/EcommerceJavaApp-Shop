@@ -1,14 +1,17 @@
 package pl.com.coders.shop2.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import pl.com.coders.shop2.domain.*;
+import pl.com.coders.shop2.domain.Cart;
+import pl.com.coders.shop2.domain.CartLineItem;
+import pl.com.coders.shop2.domain.Product;
+import pl.com.coders.shop2.domain.User;
 import pl.com.coders.shop2.domain.dto.CartDto;
 import pl.com.coders.shop2.domain.dto.CartLineItemDto;
-import pl.com.coders.shop2.mapper.CartLineItemMapper;
+import pl.com.coders.shop2.exceptions.CartLineItemCreationException;
+import pl.com.coders.shop2.exceptions.EmptyCartException;
+import pl.com.coders.shop2.exceptions.ProductNotFoundException;
 import pl.com.coders.shop2.mapper.CartMapper;
-import pl.com.coders.shop2.repository.CartLineItemRepository;
 import pl.com.coders.shop2.repository.CartRepository;
 import pl.com.coders.shop2.repository.ProductRepository;
 import pl.com.coders.shop2.repository.UserRepository;
@@ -17,6 +20,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -24,33 +28,37 @@ public class CartService {
     private final CartRepository cartRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
-    private CartMapper cartMapper;
-    private CartLineItemMapper cartLineItemMapper;
-    private CartLineItemRepository cartLineRepository;
+    private final CartMapper cartMapper;
 
-    @Autowired
-    public CartService(CartRepository cartRepository, ProductRepository productRepository, UserRepository userRepository, CartMapper cartMapper, CartLineItemMapper cartLineItemMapper, CartLineItemRepository cartLineRepository) {
-        this.cartRepository = cartRepository;
-        this.productRepository = productRepository;
-        this.userRepository = userRepository;
-        this.cartMapper = cartMapper;
-        this.cartLineItemMapper = cartLineItemMapper;
-        this.cartLineRepository = cartLineRepository;
+    public CartLineItemDto addOrUpdateCartItem(String userEmail, String productTitle, BigDecimal amount)
+            throws ProductNotFoundException, CartLineItemCreationException, EmptyCartException {
+        Cart userCart = cartRepository.getCartByUserEmail(userEmail)
+                .orElseGet(() -> {
+                    User user = userRepository.findByEmail(userEmail);
+                    Cart newCart = new Cart();
+                    newCart.setUser(user);
+                    return cartRepository.createCart(newCart);
+                });
+
+        Product product = productRepository.getProductByName(productTitle)
+                .orElseThrow(() -> new ProductNotFoundException("Product not found: " + productTitle));
+
+        CartLineItem cartItem = cartRepository.addProductToCart(userCart.getId(), product.getName(), amount);
+
+        if (cartItem == null) {
+            throw new CartLineItemCreationException("Failed to create cart line item for user: " + userEmail);
+        }
+
+        CartLineItemDto cartItemDto = new CartLineItemDto();
+        cartItemDto.setProductTitle(productTitle);
+        cartItemDto.setCartLineQuantity(cartItem.getCartLineQuantity());
+        cartItemDto.setCartLinePrice(cartItem.getCartLinePrice());
+        cartItemDto.setCartIndex(cartRepository.findCartLineItemIndex(userCart, cartItem));
+
+        return cartMapper.cartLineItemToDto(cartItemDto);
     }
 
-    public CartDto saveCart(String productTitle, String userEmail) {
-        User userOptional = userRepository.findByEmail(userEmail);
-        Optional<Product> productOptional = productRepository.getProductByName(productTitle);
-        Cart cart = userOptional.getCart();
-        Cart cart1 = cartRepository.createCart(userOptional.getEmail(), productOptional.get().getName());
-        return cartMapper.cartToDto(cart1);
-    }
 
-    public CartLineItemDto saveCartItem(String userEmail, String productTitle, BigDecimal amount) {
-        Optional<CartLineItem> cartItem = cartLineRepository.createCartLineItem(userEmail,productTitle, amount);
-        return cartLineItemMapper.cartLineItemToDto(cartItem);
-
-    }
 
     public CartDto getCartByCartId(Long cartId) {
         Cart cartByCartId = cartRepository.getCartByCartId(cartId);
@@ -63,7 +71,7 @@ public class CartService {
     }
 
     public CartDto getCartByUserEmail(String email) {
-        Cart cartByUserEmail = cartRepository.getCartByUserEmail(email);
+        Optional<Cart> cartByUserEmail = cartRepository.getCartByUserEmail(email);
         return cartMapper.cartToDto(cartByUserEmail);
     }
 
@@ -94,5 +102,4 @@ public class CartService {
         }
         return list;
     }
-
 }

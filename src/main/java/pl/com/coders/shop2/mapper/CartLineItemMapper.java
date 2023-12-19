@@ -12,16 +12,12 @@ import java.util.Optional;
 @Mapper(componentModel = "spring", uses = ProductMapper.class)
 public interface CartLineItemMapper {
 
-    CartLineItemMapper INSTANCE = Mappers.getMapper(CartLineItemMapper.class);
+        CartLineItemMapper INSTANCE = Mappers.getMapper(CartLineItemMapper.class);
 
-    @Mapping(source = "cartLineItem", target = "productTitle", qualifiedByName = "mapCartLineItemToProductTitle")
-    CartLineItemDto cartLineItemToDto(Optional<CartLineItem> cartLineItem);
+        @Mapping(source = "cartLineItem.product.name", target = "productTitle")
+        CartLineItemDto cartLineItemToDto(CartLineItem cartLineItem);
 
-    CartLineItem dtoToCartLineItem(CartLineItemDto cartLineItemDto);
-
-    @Named("mapCartLineItemToProductTitle")
-    default String mapCartLineItemToProductTitle(Optional<CartLineItem> cartLineItem) {
-        return cartLineItem.map(item -> item.getProduct().getName()).orElse(null);
+        CartLineItem dtoToCartLineItem(CartLineItemDto cartLineItemDto);
     }
-}
+
 
