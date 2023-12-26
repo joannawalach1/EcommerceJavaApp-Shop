@@ -129,6 +129,7 @@ public class CartRepository {
         return deletedCount > 0;
     }
 
+
     public int findCartLineItemIndex(Cart cart, CartLineItem cartLineItem) {
         Set<CartLineItem> cartLineItems = cart.getCartLineItems();
         Long cartItemId = cartLineItem.getId();
@@ -146,6 +147,8 @@ public class CartRepository {
 
         return -1;
     }
+
+
 }
 
 

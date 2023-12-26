@@ -3,6 +3,7 @@ package pl.com.coders.shop2.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import pl.com.coders.shop2.domain.CategoryType;
 import pl.com.coders.shop2.domain.dto.ProductDto;
 import pl.com.coders.shop2.service.ProductService;
 
@@ -46,5 +47,11 @@ public class ProductController {
     public ResponseEntity<List<ProductDto>> getAllProd() {
         List<ProductDto> productList = productService.getAllProd();
         return ResponseEntity.status(HttpStatus.OK).body(productList);
+    }
+
+    @GetMapping("/getByCategory/{categoryType}")
+    public ResponseEntity<List<ProductDto>> getProductsByCategory(@PathVariable CategoryType categoryType) {
+        List<ProductDto> productDto = productService.getProductsByCategory(categoryType);
+        return ResponseEntity.ok(productDto);
     }
 }

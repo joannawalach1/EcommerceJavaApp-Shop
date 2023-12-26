@@ -3,6 +3,7 @@ package pl.com.coders.shop2.repository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import pl.com.coders.shop2.domain.Category;
+import pl.com.coders.shop2.domain.CategoryType;
 import pl.com.coders.shop2.domain.Product;
 import pl.com.coders.shop2.exceptions.ProductWithGivenIdNotExistsException;
 import pl.com.coders.shop2.exceptions.ProductWithGivenTitleExistsException;
@@ -19,9 +20,11 @@ import java.util.Optional;
 public class ProductRepository {
     @PersistenceContext
     private final EntityManager entityManager;
+    private CategoryRepository categoryRepository;
 
-    public ProductRepository(EntityManager entityManager) {
+    public ProductRepository(EntityManager entityManager, CategoryRepository categoryRepository) {
         this.entityManager = entityManager;
+        this.categoryRepository = categoryRepository;
     }
 
     @Transactional()
@@ -43,8 +46,9 @@ public class ProductRepository {
         return product;
     }
 
-
-    public List<Product> getProductsByCategory(Category category) {
+    @Transactional
+    public List<Product> getProductsByCategory(CategoryType categoryType) {
+        Category category = categoryRepository.getCategoryByName(String.valueOf(categoryType));
         String jpql = "SELECT p FROM Product p WHERE p.category = :category";
         return entityManager.createQuery(jpql, Product.class)
                 .setParameter("category", category)
@@ -55,26 +59,23 @@ public class ProductRepository {
     public boolean delete(Long id) {
         Query query = entityManager.createQuery("DELETE FROM Product p WHERE p.id = :id")
                 .setParameter("id", id);
-
         int deletedCount = query.executeUpdate();
         return deletedCount > 0;
     }
 
     @Transactional
     public Product update(Product product, Long id) throws ProductWithGivenIdNotExistsException {
-        int updatedEntities = entityManager.createQuery(
+        Query updatedEntities = entityManager.createQuery(
                         "UPDATE Product p SET p.name = :name, p.description = :description, p.price = :price, p.quantity = :quantity WHERE p.id = :id")
                 .setParameter("name", product.getName())
                 .setParameter("description", product.getDescription())
                 .setParameter("price", product.getPrice())
                 .setParameter("quantity", product.getQuantity())
-                .setParameter("id", id)
-                .executeUpdate();
+                .setParameter("id", id);
 
-        if (updatedEntities == 0) {
+        if (updatedEntities == null) {
             throw new ProductWithGivenIdNotExistsException("Product with the given ID does not exist.");
         }
-
         return entityManager.find(Product.class, id);
     }
 

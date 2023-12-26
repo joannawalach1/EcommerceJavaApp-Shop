@@ -31,4 +31,7 @@ public class User {
 
     public User(long id, String mail, String first_name, String last_name, String password) {
     }
+
+    public User(String login) {
+    }
 }

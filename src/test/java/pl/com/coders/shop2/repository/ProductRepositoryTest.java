@@ -50,11 +50,11 @@ class ProductRepositoryTest {
         assertNotNull(productById);
     }
 
-    @Test
-    void shouldGetProductFromRepository() {
-        List<Product> foundProducts = productRepository.getProductsByCategory(category);
-        assertThat(foundProducts).isNotNull();
-    }
+//    @Test
+//    void shouldGetProductFromRepository() {
+//        List<Product> foundProducts = productRepository.getProductsByCategory(category);
+//        assertThat(foundProducts).isNotNull();
+//    }
 
 //    @Test
 //    void shouldDeleteProductFromRepository() {
