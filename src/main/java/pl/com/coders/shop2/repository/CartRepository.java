@@ -62,7 +62,7 @@ public class CartRepository {
     }
 
     public Cart createCart(Cart newCart) {
-        entityManager.persist(newCart);
+        entityManager.merge(newCart);
         return newCart;
     }
 

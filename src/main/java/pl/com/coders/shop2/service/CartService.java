@@ -11,6 +11,7 @@ import pl.com.coders.shop2.domain.dto.CartLineItemDto;
 import pl.com.coders.shop2.exceptions.CartLineItemCreationException;
 import pl.com.coders.shop2.exceptions.EmptyCartException;
 import pl.com.coders.shop2.exceptions.ProductNotFoundException;
+import pl.com.coders.shop2.helpers.CartTotalCalculator;
 import pl.com.coders.shop2.mapper.CartMapper;
 import pl.com.coders.shop2.repository.CartRepository;
 import pl.com.coders.shop2.repository.ProductRepository;
@@ -29,6 +30,7 @@ public class CartService {
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final CartMapper cartMapper;
+    private CartTotalCalculator cartTotalCalculator;
 
     public CartLineItemDto addOrUpdateCartItem(String userEmail, String productTitle, BigDecimal amount)
             throws ProductNotFoundException, CartLineItemCreationException, EmptyCartException {
@@ -48,7 +50,12 @@ public class CartService {
         if (cartItem == null) {
             throw new CartLineItemCreationException("Failed to create cart line item for user: " + userEmail);
         }
+        product.setQuantity(product.getQuantity() - cartItem.getCartLineQuantity());
 
+        Set<CartLineItem> cartItems = userCart.getCartLineItems();
+        BigDecimal totalPrice = cartTotalCalculator.calculateTotalPriceForCart(cartItems);
+        userCart.setTotalPrice(totalPrice);
+        cartRepository.createCart(userCart);
         CartLineItemDto cartItemDto = new CartLineItemDto();
         cartItemDto.setProductTitle(productTitle);
         cartItemDto.setCartLineQuantity(cartItem.getCartLineQuantity());
@@ -57,7 +64,6 @@ public class CartService {
 
         return cartMapper.cartLineItemToDto(cartItemDto);
     }
-
 
 
     public CartDto getCartByCartId(Long cartId) {
