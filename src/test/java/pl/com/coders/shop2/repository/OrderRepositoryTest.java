@@ -39,15 +39,15 @@ class OrderRepositoryTest {
         assertNotNull(ordersById);
     }
 
-//    @Test
-//    void delete() {
-//        boolean deletedOrders = orderRepository.delete(UUID.fromString("a0a1ab07-d158-4e89-8b42-2fd8c677147f"));
-//        assertTrue(deletedOrders);
-//    }
+    @Test
+    void delete() {
+        boolean deletedOrders = orderRepository.delete(UUID.fromString("a0a1ab07-d158-4e89-8b42-2fd8c677147f"));
+        assertTrue(deletedOrders);
+    }
 
     @Test
     void findAllOrders() {
         List<Order> orders = orderRepository.findAllOrders();
-        assertEquals(2, orders.size());
+        assertEquals(1, orders.size());
     }
 }

@@ -47,15 +47,20 @@ public class OrderRepository {
     }
 
     public boolean delete(UUID orderId) {
+        entityManager.createQuery("DELETE FROM OrderLineItem oli WHERE oli.order.id = :orderId")
+                .setParameter("orderId", orderId)
+                .executeUpdate();
+
         Query query = entityManager.createQuery("DELETE FROM Order o WHERE o.id = :orderId");
         query.setParameter("orderId", orderId);
+
         int deletedCount = query.executeUpdate();
         return deletedCount > 0;
     }
 
     public List<Order> findAllOrders() {
-            TypedQuery<Order> query = entityManager.createQuery("SELECT o FROM Order o", Order.class);
-            return query.getResultList();
-        }
+        TypedQuery<Order> query = entityManager.createQuery("SELECT o FROM Order o", Order.class);
+        return query.getResultList();
     }
+}
 

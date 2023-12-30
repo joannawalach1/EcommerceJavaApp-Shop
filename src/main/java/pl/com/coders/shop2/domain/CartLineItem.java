@@ -20,11 +20,12 @@ public class CartLineItem {
     @ManyToOne
     private Cart cart;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.MERGE)
     private Product product;
 
     private int cartLineQuantity;
     private BigDecimal cartLinePrice;
-    @Column(name = "cart_index")
-    private Integer cartIndex;
+    @Column(name = "cartIndex")
+    private int cartIndex;
+
 }

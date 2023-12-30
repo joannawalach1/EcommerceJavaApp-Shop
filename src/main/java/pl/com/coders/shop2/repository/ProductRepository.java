@@ -15,12 +15,11 @@ import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import java.util.List;
 import java.util.Optional;
-
 @Repository
 public class ProductRepository {
     @PersistenceContext
     private final EntityManager entityManager;
-    private CategoryRepository categoryRepository;
+    private final CategoryRepository categoryRepository;
 
     public ProductRepository(EntityManager entityManager, CategoryRepository categoryRepository) {
         this.entityManager = entityManager;
@@ -57,10 +56,22 @@ public class ProductRepository {
 
     @Transactional
     public boolean delete(Long id) {
-        Query query = entityManager.createQuery("DELETE FROM Product p WHERE p.id = :id")
-                .setParameter("id", id);
-        int deletedCount = query.executeUpdate();
-        return deletedCount > 0;
+        Product product = entityManager.find(Product.class, id);
+
+        if (product != null) {
+            entityManager.createQuery("DELETE FROM CartLineItem cli WHERE cli.product = :product")
+                    .setParameter("product", product)
+                    .executeUpdate();
+
+            entityManager.createQuery("DELETE FROM OrderLineItem oli WHERE oli.product = :product")
+                    .setParameter("product", product)
+                    .executeUpdate();
+
+            entityManager.remove(product);
+            return true;
+        }
+
+        return false;
     }
 
     @Transactional
@@ -98,5 +109,4 @@ public class ProductRepository {
         List<Product> resultList = query.getResultList();
         return resultList.isEmpty() ? Optional.empty() : Optional.of(resultList.get(0));
     }
-
 }

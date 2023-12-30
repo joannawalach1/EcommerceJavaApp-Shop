@@ -69,14 +69,14 @@ class ProductServiceTest {
         verify(productMapper, times(1)).productToDto(product);
     }
 
-//    @Test
-//    void delete() {
-//        Long id = 1L;
-//        when(productRepository.delete(id)).thenReturn(true);
-//        boolean resultProduct = productService.delete(id);
-//        assertTrue(resultProduct);
-//        verify(productRepository, times(1)).delete(id);
-//    }
+    @Test
+    void delete() {
+        Long id = 1L;
+        when(productRepository.delete(id)).thenReturn(true);
+        boolean resultProduct = productService.delete(id);
+        assertTrue(resultProduct);
+        verify(productRepository, times(1)).delete(id);
+    }
 
     @Test
     void update() {

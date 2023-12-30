@@ -19,9 +19,9 @@ import static java.lang.System.*;
 @AllArgsConstructor
 public class ProductService {
     private final ProductRepository productRepository;
-    private ProductMapper productMapper;
-    private CategoryRepository categoryRepository;
-    private OrderLineItemRepository orderLineItemRepository;
+    private final ProductMapper productMapper;
+    private final CategoryRepository categoryRepository;
+    private final OrderLineItemRepository orderLineItemRepository;
 
     public ProductDto create(ProductDto productDto) {
         Long categoryId = productDto.getCategoryType().getId();
@@ -41,7 +41,6 @@ public class ProductService {
     }
 
     public boolean delete(Long id) {
-        orderLineItemRepository.deleteByProductId(id);
         productRepository.delete(id);
         return true;
     }

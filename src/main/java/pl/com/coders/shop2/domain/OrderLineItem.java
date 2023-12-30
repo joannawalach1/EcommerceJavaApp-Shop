@@ -19,7 +19,7 @@ public class OrderLineItem {
     @ManyToOne
     private Order order;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.MERGE)
     private Product product;
     private int quantity;
 }

@@ -1,6 +1,8 @@
 package pl.com.coders.shop2.domain;
 
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -26,7 +28,9 @@ public class User {
     private Set<Order> orders;
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private Cart cart;
+    @CreationTimestamp
     private LocalDateTime created;
+    @UpdateTimestamp
     private LocalDateTime updated;
 
     public User(long id, String mail, String first_name, String last_name, String password) {

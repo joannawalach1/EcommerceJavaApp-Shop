@@ -50,19 +50,19 @@ class ProductRepositoryTest {
         assertNotNull(productById);
     }
 
-//    @Test
-//    void shouldGetProductFromRepository() {
-//        List<Product> foundProducts = productRepository.getProductsByCategory(category);
-//        assertThat(foundProducts).isNotNull();
-//    }
+    @Test
+    void shouldGetProductFromRepository() {
+        List<Product> foundProducts = productRepository.getProductsByCategory(categoryType);
+        assertThat(foundProducts).isNotNull();
+    }
 
-//    @Test
-//    void shouldDeleteProductFromRepository() {
-//        Long productIdToDelete = 2L;
-//        Product found = productRepository.getProductById(productIdToDelete);
-//        boolean deletedProduct = productRepository.delete(2L);
-//        assertTrue(deletedProduct);
-//    }
+    @Test
+    void shouldDeleteProductFromRepository() {
+        Long productIdToDelete = 2L;
+        Product found = productRepository.getProductById(productIdToDelete);
+        boolean deletedProduct = productRepository.delete(found.getId());
+        assertTrue(deletedProduct);
+    }
 
     @Test
     void shouldUpdateProductInRepository() {
@@ -77,7 +77,7 @@ class ProductRepositoryTest {
     @Test
     void shouldFindAllProductsInRepository() {
         List<Product> allProducts = productRepository.findAllProd();
-        assertEquals(3, allProducts.size());
+        assertEquals(2, allProducts.size());
     }
 
     @Test

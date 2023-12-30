@@ -1,7 +1,7 @@
 create table carts (
 id BIGSERIAL PRIMARY KEY NOT NULL,
-created timestamp,
+user_id INT NOT NULL,
 total_price numeric(15, 2),
-updated timestamp,
-user_id INT NOT NULL
+created timestamp,
+updated timestamp
 );
