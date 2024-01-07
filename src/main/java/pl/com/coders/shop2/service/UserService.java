@@ -28,6 +28,4 @@ public class UserService {
         User byEmail = userRepository.findByEmail(email);
         return userMapper.userToDto(byEmail);
     }
-
-
 }
