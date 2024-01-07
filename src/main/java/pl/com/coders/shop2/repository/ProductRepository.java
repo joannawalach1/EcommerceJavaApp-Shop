@@ -28,9 +28,6 @@ public class ProductRepository {
 
     @Transactional()
     public Product add(Product product) throws ProductWithGivenTitleExistsException {
-        if (getProductByName(product.getName()).isPresent()) {
-            throw new ProductWithGivenTitleExistsException("Product with the given title already exists.");
-        }
         if (product.getName() == null) {
             throw new ProductWithGivenTitleNotExistsException("Product with the given title doesn't exist");
         }

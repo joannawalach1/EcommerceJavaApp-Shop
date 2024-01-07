@@ -20,8 +20,8 @@ public class CartController {
         this.cartService = cartService;
     }
 
-    @PostMapping("/addOrUpdateCartItem")
-    public ResponseEntity<CartLineItemDto> addToCart(
+    @PostMapping("/addProductToCart")
+    public ResponseEntity<CartLineItemDto> addProductToCart(
             @RequestParam String userEmail,
             @RequestParam String productTitle,
             @RequestParam int amount) throws ProductNotFoundException {
@@ -29,25 +29,17 @@ public class CartController {
         return ResponseEntity.status(HttpStatus.OK).body(cartItemDto);
     }
 
-    @DeleteMapping("/deleteByCartIndex")
-    public ResponseEntity<String> deleteByCartIndex(@RequestParam int cartIndex) {
-        if (cartIndexExists(cartIndex)) {
-            cartService.deleteByCartIndex(cartIndex);
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT)
-                    .body("Cart with index " + cartIndex + " does not exist.");
-        }
+    @DeleteMapping("/{cartIndex}")
+    public ResponseEntity<String> deleteCartByIndex(@PathVariable int cartIndex ) {
+        cartService.deleteByIndex(cartIndex);
+        return ResponseEntity.noContent().build();
     }
 
-    private boolean cartIndexExists(int cartIndex) {
-        try {
-            CartLineItem cartLineItem = cartService.getCartByIndex(cartIndex);
-            return cartLineItem != null;
-        } catch (NoSuchElementException e) {
-            return false;
-        }
-    }
+//    @DeleteMapping("/removeEmptyCarts")
+//    public ResponseEntity<Void> removeEmptyCarts() {
+//            cartService.removeEmptyCarts();
+//            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+//    }
 }
 
 

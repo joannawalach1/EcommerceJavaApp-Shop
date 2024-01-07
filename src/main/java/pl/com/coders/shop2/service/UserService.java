@@ -24,9 +24,9 @@ public class UserService {
         return userMapper.userToDto(savedUser);
     }
 
-    public Optional<UserDto> findByEmail(String email) {
-        return Optional.ofNullable(userRepository.findByEmail(email))
-                .map(userMapper::userToDto);
+    public UserDto findByEmail(String email) {
+        User byEmail = userRepository.findByEmail(email);
+        return userMapper.userToDto(byEmail);
     }
 
 

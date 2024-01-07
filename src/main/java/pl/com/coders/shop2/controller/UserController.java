@@ -24,8 +24,8 @@ public class UserController {
     }
 
     @GetMapping("/{email}")
-    public ResponseEntity<Optional<UserDto>> findByEmail(@PathVariable String email) {
-        Optional<UserDto> user = userService.findByEmail(email);
+    public ResponseEntity<UserDto> findByEmail(@PathVariable String email) {
+        UserDto user = userService.findByEmail(email);
         return ResponseEntity.status(HttpStatus.OK).body(user);
     }
 }
