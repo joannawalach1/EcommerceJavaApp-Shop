@@ -13,6 +13,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Transactional
 @Repository
@@ -23,11 +25,10 @@ public class CartRepository {
     private final EntityManager entityManager;
     private final UserRepository userRepository;
 
-
     public Cart createCart(User user) {
         Cart newCart = new Cart();
         newCart.setUser(user);
-        newCart.setCartLineItems(newCart.getCartLineItems());
+        newCart.setCartLineItems(new ArrayList<>());
         newCart.setTotalPrice(BigDecimal.ZERO);
         entityManager.persist(newCart);
         return newCart;
@@ -42,23 +43,24 @@ public class CartRepository {
         CartLineItem cartLineItem = new CartLineItem();
         cartLineItem.setCart(cart);
         cartLineItem.setProduct(product);
-        cartLineItem.setCartLineQuantity(cartLineItem.getCartLineQuantity() + amount);
+        cartLineItem.setCartLineQuantity(amount);
         cartLineItem.setCartLinePrice(product.getPrice().multiply(BigDecimal.valueOf(amount)));
-        cartLineItem.setCartIndex(generateCartIndex());
+        cartLineItem.setCartIndex(generateCartIndex(cart));
         entityManager.persist(cartLineItem);
         return cartLineItem;
     }
 
-    public void updateCartLineItem(int amount, CartLineItem existingCartItem, Product product) {
+    public CartLineItem updateCartLineItem(int amount, CartLineItem existingCartItem, Product product) {
         int newQuantity = existingCartItem.getCartLineQuantity() + amount;
         existingCartItem.setCartLineQuantity(newQuantity);
+        existingCartItem.setCartLinePrice(product.getPrice().multiply(BigDecimal.valueOf(newQuantity)));
         entityManager.merge(existingCartItem);
+        return existingCartItem;
     }
 
-    public int generateCartIndex() {
-        Integer lastCartIndex = entityManager.createQuery("SELECT MAX(c.cartIndex) FROM CartLineItem c", Integer.class)
-                .getSingleResult();
-        return (lastCartIndex != null) ? (lastCartIndex + 1) : 1;
+    public int generateCartIndex(Cart cart) {
+        Integer lastCartIndex = cart.getCartLineItems().size();
+        return lastCartIndex + 1;
     }
 
     public Cart getCartForUser(String email) {
@@ -75,7 +77,6 @@ public class CartRepository {
         if (existingCart == null) {
             existingCart = createCart(user);
         }
-
         return existingCart;
     }
 
@@ -86,15 +87,23 @@ public class CartRepository {
         return query.getSingleResult();
     }
 
-//    public List<Cart> getEmptyCarts() {
-//            String jpql = "SELECT c FROM Cart c WHERE c.totalPrice = 0";
-//            TypedQuery<Cart> query = entityManager.createQuery(jpql, Cart.class);
-//            return query.getResultList();
-//        }
-//
-//    public void removeCart(Cart cart) {
-//        entityManager.remove(cart);
-//        entityManager.flush();
-//    }
+    @Transactional
+    public List<CartLineItem> getCartLineItemsByCartId(long cartId) {
+        return entityManager.createQuery("SELECT c FROM CartLineItem c WHERE c.cart.id = :cartId", CartLineItem.class)
+                .setParameter("cartId", cartId)
+                .getResultList();
+    }
+
+    @Transactional
+        public void deleteCart(long cartId) {
+            Cart cartToRemove = entityManager.find(Cart.class, cartId);
+            if (cartToRemove == null) {
+                entityManager.remove(cartToRemove);
+            }
+    }
+    public Cart getCartByCartId(long cartId) {
+        return entityManager.find(Cart.class, cartId);
+    }
 }
+
 

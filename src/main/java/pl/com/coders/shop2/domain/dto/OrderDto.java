@@ -3,7 +3,7 @@ package pl.com.coders.shop2.domain.dto;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.util.Set;
+import java.util.*;
 
 @Data
     @NoArgsConstructor
@@ -13,7 +13,7 @@ import java.util.Set;
     public class OrderDto {
     private String userLastName;
     private BigDecimal totalAmount;
-    private Set<OrderLineItemDto> orderLineDtoItems;
+    private List<OrderLineItemDto> orderLineDtoItems;
 
 }
 

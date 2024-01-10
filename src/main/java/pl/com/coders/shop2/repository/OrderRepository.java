@@ -3,16 +3,17 @@ package pl.com.coders.shop2.repository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import pl.com.coders.shop2.domain.Order;
-import pl.com.coders.shop2.domain.User;
+import pl.com.coders.shop2.domain.OrderLineItem;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
-@Transactional
+
 @Repository
 public class OrderRepository {
 
@@ -24,26 +25,22 @@ public class OrderRepository {
         this.entityManager = entityManager;
         this.userRepository = userRepository;
     }
+    @Transactional
+    public void saveOrder(Order order) {
+        entityManager.merge(order);
+    }
 
-    public List<Order> findOrdersByUserId(Long userId) {
+    @Transactional
+    public void saveOrderLineItems(OrderLineItem orderLineItem) {
+            entityManager.persist(orderLineItem);
+    }
+
+    @Transactional
+    public Order findOrdersByUserEmail(String userEmail) {
         String jpql = "SELECT o FROM Order o WHERE o.user.id = :userId";
         TypedQuery<Order> query = entityManager.createQuery(jpql, Order.class);
-        query.setParameter("userId", userId);
-        return query.getResultList();
-    }
-
-    public List<Order> findOrdersById(UUID orderId) {
-        String jpql = "SELECT o FROM Order o WHERE o.id = :orderId";
-        TypedQuery<Order> query = entityManager.createQuery(jpql, Order.class);
-        query.setParameter("orderId", orderId);
-        return query.getResultList();
-    }
-
-    public Order saveOrder(Order order) {
-        User savedUser = userRepository.create(order.getUser());
-        order.setUser(savedUser);
-        entityManager.merge(order);
-        return order;
+        query.setParameter("userEmail", userEmail);
+        return query.getSingleResult();
     }
 
     public boolean delete(UUID orderId) {

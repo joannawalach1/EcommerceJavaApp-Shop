@@ -3,12 +3,9 @@ package pl.com.coders.shop2.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pl.com.coders.shop2.domain.CartLineItem;
-import pl.com.coders.shop2.domain.dto.CartLineItemDto;
+import pl.com.coders.shop2.domain.dto.CartDto;
 import pl.com.coders.shop2.exceptions.ProductNotFoundException;
 import pl.com.coders.shop2.service.CartService;
-
-import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/carts")
@@ -21,25 +18,19 @@ public class CartController {
     }
 
     @PostMapping("/addProductToCart")
-    public ResponseEntity<CartLineItemDto> addProductToCart(
+    public ResponseEntity<CartDto> addProductToCart(
             @RequestParam String userEmail,
             @RequestParam String productTitle,
             @RequestParam int amount) throws ProductNotFoundException {
-        CartLineItemDto cartItemDto = cartService.addProductToCart(userEmail, productTitle, amount);
-        return ResponseEntity.status(HttpStatus.OK).body(cartItemDto);
+        CartDto cart = cartService.addProductToCart(userEmail, productTitle, amount);
+        return ResponseEntity.status(HttpStatus.OK).body(cart);
     }
 
-    @DeleteMapping("/{cartIndex}")
-    public ResponseEntity<String> deleteCartByIndex(@PathVariable int cartIndex ) {
-        cartService.deleteByIndex(cartIndex);
+    @DeleteMapping("/{cartIndex}/{cartId}")
+    public ResponseEntity<String> deleteCartByIndex( @PathVariable int cartIndex, @PathVariable Long cartId) {
+        cartService.deleteByIndex(cartId, cartIndex);
         return ResponseEntity.noContent().build();
     }
-
-//    @DeleteMapping("/removeEmptyCarts")
-//    public ResponseEntity<Void> removeEmptyCarts() {
-//            cartService.removeEmptyCarts();
-//            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-//    }
 }
 
 

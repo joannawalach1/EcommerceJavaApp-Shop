@@ -7,6 +7,7 @@ import pl.com.coders.shop2.domain.dto.OrderDto;
 import pl.com.coders.shop2.service.OrderService;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @RestController
@@ -19,21 +20,9 @@ public class OrderController {
         this.orderService = orderService;
     }
 
-    @GetMapping("/user/{id}")
-    public ResponseEntity<List<OrderDto>> getOrdersByUserId(@PathVariable Long id) {
-        List<OrderDto> orderByUserId = orderService.findOrdersByUserId(id);
-        return ResponseEntity.status(HttpStatus.OK).body(orderByUserId);
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<List<OrderDto>> findOrderByOrderId(@PathVariable UUID id) {
-        List<OrderDto> ordersByOrderId = orderService.findOrderById(id);
-        return ResponseEntity.status(HttpStatus.OK).body(ordersByOrderId);
-    }
-
-    @PostMapping
-    public ResponseEntity<OrderDto> saveOrder(@RequestBody OrderDto orderDto) {
-        OrderDto createdOrder = orderService.saveOrder(orderDto);
+    @PostMapping("saveOrder/{userEmail}/{cartId}")
+    public ResponseEntity<OrderDto> saveOrder(@PathVariable String userEmail, @PathVariable Long cartId) {
+        OrderDto createdOrder = orderService.saveOrder(userEmail, cartId);
         return ResponseEntity.status(HttpStatus.OK).body(createdOrder);
     }
 

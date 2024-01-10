@@ -2,11 +2,13 @@ package pl.com.coders.shop2.domain;
 
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -16,18 +18,24 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode
 @Builder
 public class Order {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(generator = "uuid2")
+    @GenericGenerator(name = "uuid2", strategy = "uuid2")
+    @Column(columnDefinition = "BINARY(16)")
     private UUID id;
     private BigDecimal totalAmount;
 
     @ManyToOne
     private User user;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
     private Set<OrderLineItem> orderLineItems;
+
+    @Column(name = "order_status")
+    private String status;
 
     @CreationTimestamp
     private LocalDateTime created;
@@ -35,11 +43,15 @@ public class Order {
     @UpdateTimestamp
     private LocalDateTime updated;
 
-    public Order(User user1, double v) {
-    }
-
-    public void addOrderLineItem(OrderLineItem orderLineItem) {
+    public void addOrderLineItems(OrderLineItem orderLineItem) {
         orderLineItems.add(orderLineItem);
+        orderLineItem.setOrder(this);
     }
 
+    public void setOrderLineItems(Set<OrderLineItem> orderLineItems) {
+        this.orderLineItems = orderLineItems;
+        for (OrderLineItem orderLineItem : orderLineItems) {
+            orderLineItem.setOrder(this);
+        }
+    }
 }

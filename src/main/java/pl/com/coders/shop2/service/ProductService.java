@@ -8,7 +8,6 @@ import pl.com.coders.shop2.domain.Product;
 import pl.com.coders.shop2.domain.dto.ProductDto;
 import pl.com.coders.shop2.mapper.ProductMapper;
 import pl.com.coders.shop2.repository.CategoryRepository;
-import pl.com.coders.shop2.repository.OrderLineItemRepository;
 import pl.com.coders.shop2.repository.ProductRepository;
 
 import java.util.List;
@@ -21,7 +20,6 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
     private final CategoryRepository categoryRepository;
-    private final OrderLineItemRepository orderLineItemRepository;
 
     public ProductDto create(ProductDto productDto) {
         Long categoryId = productDto.getCategoryType().getId();
