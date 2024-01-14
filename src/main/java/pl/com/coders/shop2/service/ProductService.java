@@ -58,5 +58,4 @@ public class ProductService {
         List<Product> productsByCategory = productRepository.getProductsByCategory(categoryType);
         return productMapper.productsToDtos(productsByCategory);
     }
-
 }

@@ -15,7 +15,6 @@ import pl.com.coders.shop2.repository.UserRepository;
 
 import javax.transaction.Transactional;
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Optional;
 
 @Transactional
@@ -28,29 +27,29 @@ public class CartService {
     private final UserRepository userRepository;
     private final CartMapper cartMapper;
 
+
     public CartDto addProductToCart(String userEmail, String productTitle, int amount)
             throws ProductNotFoundException {
         User user = userRepository.findByEmail(userEmail);
         Product product = getProduct(productTitle);
         Cart userCart = getOrCreateUserCart(userEmail, user);
-
         CartLineItem existingCartItem = findCartItem(userCart, product);
         if (existingCartItem == null) {
-            existingCartItem = cartRepository.createCartLineItem(amount, userCart, product);
+            cartRepository.createCartLineItem(amount, userCart, product);
         } else {
             if (product.getQuantity() >= amount) {
-                existingCartItem = cartRepository.updateCartLineItem(amount, existingCartItem, product);
+                cartRepository.updateCartLineItem(amount, existingCartItem, product);
             }
+            updateAfterAddingItem(userCart, existingCartItem, amount);
+            productRepository.update(product, product.getId());
         }
-        userCart.setTotalPrice(calculateCartTotalPrice(userCart));
-        product.setQuantity(product.getQuantity() - amount);
         productRepository.update(product, product.getId());
         cartRepository.updateCart(userCart);
         return cartMapper.toDto(userCart);
     }
 
 
-    private Cart getOrCreateUserCart(String userEmail, User user) {
+    public Cart getOrCreateUserCart(String userEmail, User user) {
         Cart userCart = cartRepository.getCartForUser(userEmail);
         if (userCart == null) {
             userCart = cartRepository.createCart(user);
@@ -65,7 +64,7 @@ public class CartService {
 
     private CartLineItem findCartItem(Cart cart, Product product) {
         return cart.getCartLineItems().stream()
-                .filter(cli -> cli.getProduct().equals(product))
+                .filter(cli -> cli.getProduct().getName().equals(product.getName()))
                 .findFirst()
                 .orElse(null);
     }
@@ -73,33 +72,46 @@ public class CartService {
     public void deleteByIndex(long cartId, int cartIndex) {
         Cart cart = cartRepository.getCartByCartId(cartId);
 
-        Optional<CartLineItem> cartLineItemOptional = cart.getCartLineItems().stream()
-                .filter(item -> item.getCartIndex() == cartIndex)
-                .findFirst();
+        if (cart != null) {
+            Optional<CartLineItem> cartLineItemOptional = cart.getCartLineItems().stream()
+                    .filter(item -> item.getCartIndex() == cartIndex)
+                    .findFirst();
 
-        cartLineItemOptional.ifPresent(cartLineItem -> {
-            cart.getCartLineItems().remove(cartLineItem);
-            cartLineItem.getProduct().setQuantity(cartLineItem.getProduct().getQuantity());
-            cart.setTotalPrice(calculateCartTotalPrice(cart));
-            updateCartIndex(cart, cartIndex);
-            cartRepository.updateCart(cart);
-        });
+            cartLineItemOptional.ifPresent(cartLineItem -> {
+                cart.getCartLineItems().remove(cartLineItem);
+                updateCartAfterItemRemoval(cart, cartLineItem);
+                cart.setTotalPrice(cartRepository.calculateCartTotalPrice(cart));
+                cartRepository.updateCart(cart);
+            });
+
+            if (cart.getCartLineItems().isEmpty() && cart.getTotalPrice().compareTo(BigDecimal.ZERO) == 0) {
+                cartRepository.deleteCart(cartId);
+            }
+        }
     }
+
+    private void updateCartAfterItemRemoval(Cart cart, CartLineItem removedItem) {
+        Product product = removedItem.getProduct();
+        product.setQuantity(product.getQuantity() + removedItem.getCartLineQuantity());
+
+        cart.setTotalPrice(cartRepository.calculateCartTotalPrice(cart));
+        updateCartIndex(cart, removedItem.getCartIndex());
+    }
+
+    private void updateAfterAddingItem(Cart cart, CartLineItem addedItem, int amount) {
+        if (addedItem != null) {
+            Product product = addedItem.getProduct();
+            int remainingQuantity = Math.max(product.getQuantity() - amount, 0);
+            product.setQuantity(remainingQuantity);
+        }
+    }
+
 
     private void updateCartIndex(Cart cart, int deletedIndex) {
         cart.getCartLineItems().stream()
                 .filter(item -> item.getCartIndex() > deletedIndex)
-                .toList()
-                .forEach(cartItem ->  {
-                    cartItem.setCartIndex(cartItem.getCartIndex()-1);
-                });
-    }
-
-
-    private BigDecimal calculateCartTotalPrice(Cart userCart) {
-        return userCart.getCartLineItems().stream()
-                .map(CartLineItem::getCartLinePrice)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                .forEach(cartItem -> cartItem.setCartIndex(cartItem.getCartIndex() - 1));
     }
 }
+
 

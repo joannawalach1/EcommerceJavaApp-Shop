@@ -11,6 +11,7 @@ import pl.com.coders.shop2.exceptions.UserNotFoundException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -29,12 +30,13 @@ public class CartRepository {
         Cart newCart = new Cart();
         newCart.setUser(user);
         newCart.setCartLineItems(new ArrayList<>());
-        newCart.setTotalPrice(BigDecimal.ZERO);
+        newCart.setTotalPrice(calculateCartTotalPrice(newCart));
         entityManager.persist(newCart);
         return newCart;
     }
 
     public Cart updateCart(Cart userCart) {
+        userCart.setTotalPrice(calculateCartTotalPrice(userCart));
         entityManager.merge(userCart);
         return userCart;
     }
@@ -46,6 +48,7 @@ public class CartRepository {
         cartLineItem.setCartLineQuantity(amount);
         cartLineItem.setCartLinePrice(product.getPrice().multiply(BigDecimal.valueOf(amount)));
         cartLineItem.setCartIndex(generateCartIndex(cart));
+        cart.addCartLineItem(cartLineItem);
         entityManager.persist(cartLineItem);
         return cartLineItem;
     }
@@ -54,6 +57,7 @@ public class CartRepository {
         int newQuantity = existingCartItem.getCartLineQuantity() + amount;
         existingCartItem.setCartLineQuantity(newQuantity);
         existingCartItem.setCartLinePrice(product.getPrice().multiply(BigDecimal.valueOf(newQuantity)));
+        existingCartItem.setCartIndex(existingCartItem.getCartIndex());
         entityManager.merge(existingCartItem);
         return existingCartItem;
     }
@@ -65,11 +69,9 @@ public class CartRepository {
 
     public Cart getCartForUser(String email) {
         User user = userRepository.findByEmail(email);
-
         if (user == null) {
             throw new UserNotFoundException("User not found for email: " + email);
         }
-
         Cart existingCart = entityManager.createQuery("SELECT c FROM Cart c JOIN FETCH c.user WHERE c.user = :user", Cart.class)
                 .setParameter("user", user)
                 .getResultList().stream().findFirst().orElse(null);
@@ -80,29 +82,34 @@ public class CartRepository {
         return existingCart;
     }
 
-    public CartLineItem getCartLineItemByIndex(int cartIndex) {
+    public CartLineItem getCartLineItemByIndex(Long cartIndex) {
         TypedQuery<CartLineItem> query = entityManager.createQuery(
                 "SELECT cli FROM CartLineItem cli WHERE cli.cartIndex = :cartIndex", CartLineItem.class);
         query.setParameter("cartIndex", cartIndex);
         return query.getSingleResult();
     }
 
-    @Transactional
+
     public List<CartLineItem> getCartLineItemsByCartId(long cartId) {
         return entityManager.createQuery("SELECT c FROM CartLineItem c WHERE c.cart.id = :cartId", CartLineItem.class)
                 .setParameter("cartId", cartId)
                 .getResultList();
     }
 
-    @Transactional
-        public void deleteCart(long cartId) {
-            Cart cartToRemove = entityManager.find(Cart.class, cartId);
-            if (cartToRemove == null) {
-                entityManager.remove(cartToRemove);
-            }
-    }
-    public Cart getCartByCartId(long cartId) {
+    public void deleteCart(Long cartId) {
+            Query deleteQuery = entityManager.createQuery("DELETE FROM Cart c WHERE c.id = :cartId");
+            deleteQuery.setParameter("cartId", cartId);
+            deleteQuery.executeUpdate();
+        }
+
+    public Cart getCartByCartId(Long cartId) {
         return entityManager.find(Cart.class, cartId);
+    }
+
+    public BigDecimal calculateCartTotalPrice(Cart userCart) {
+        return userCart.getCartLineItems().stream()
+                .map(CartLineItem::getCartLinePrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }
 

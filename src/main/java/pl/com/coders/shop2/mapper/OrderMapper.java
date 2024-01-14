@@ -19,8 +19,8 @@ import java.util.stream.Collectors;
 public interface OrderMapper {
     OrderMapper INSTANCE = Mappers.getMapper(OrderMapper.class);
 
-    @Mapping(source = "user", target = "userLastName", qualifiedByName = "mapUserToLastName")
-    @Mapping(source = "orderLineItems", target = "orderLineDtoItems", qualifiedByName = "mapOrderLineItems")
+   @Mapping(source = "user", target = "userLastName", qualifiedByName = "mapUserToLastName")
+   @Mapping(source = "orderLineItems", target = "orderLineDtoItems", qualifiedByName = "mapOrderLineItems")
     OrderDto orderToDto(Order order);
 
     @Mapping(source = "userLastName", target = "user", qualifiedByName = "mapLastNameToUser")
@@ -28,7 +28,7 @@ public interface OrderMapper {
 
     @Named("mapUserToLastName")
     default String mapUserToLastName(User user) {
-        return user != null ? user.getLastName() : null;
+        return user != null ? user.getLastName() +user.getFirstName() : null;
     }
 
     @Named("mapLastNameToUser")

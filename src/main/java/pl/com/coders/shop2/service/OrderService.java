@@ -11,10 +11,7 @@ import pl.com.coders.shop2.repository.OrderRepository;
 import pl.com.coders.shop2.repository.UserRepository;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -25,14 +22,14 @@ public class OrderService {
     private final CartRepository cartRepository;
 
     @Transactional
-    public OrderDto saveOrder(String userEmail, long cartId) {
+    public OrderDto saveOrder(String userEmail, Long cartId) {
         User user = userRepository.findByEmail(userEmail);
         Cart cart = cartRepository.getCartByCartId(cartId);
         if (user != null) {
             Order order = new Order();
             order.setId(UUID.randomUUID());
             order.setUser(user);
-            //order.setTotalAmount(cart.getTotalPrice());
+            order.setTotalAmount(cart.getTotalPrice());
             order.setStatus("nowy");
             order.setOrderLineItems(new HashSet<>());
             order.setCreated(LocalDateTime.now());
@@ -43,18 +40,15 @@ public class OrderService {
 
             for (CartLineItem cartLineItem : cartsItems) {
                 OrderLineItem orderLineItem = new OrderLineItem();
-                Product product = cartLineItem.getProduct();
-                orderLineItem.setOrder(order);
-                order.setId(order.getId());
-                orderLineItem.setProduct(product);
-                orderLineItem.setQuantity(cartLineItem.getCartLineQuantity());
+                orderLineItem.setProduct(cartLineItem.getProduct());
                 orderLineItem.setPrice(cartLineItem.getCartLinePrice());
+                orderLineItem.setQuantity(cartLineItem.getCartLineQuantity());
+                order.addOrderLineItems(orderLineItem);
+
                 order.addOrderLineItems(orderLineItem);
             }
-            System.out.println("Przed zapisem order, id: {}" + order.getId());
-            orderRepository.saveOrder(order);
-            System.out.println("Po zapisie order, id: {}" + order.getId());
-            cartRepository.deleteCart(cartId);
+            orderRepository.createOrder(order);
+           // cartRepository.deleteCartAndItems(cartId, cart);
 
             return orderMapper.orderToDto(order);
         } else {

@@ -42,5 +42,13 @@ public class UserRepository {
         query.setParameter("userLastName", userLastName);
         return query.getSingleResult();
     }
+
+    @Transactional
+    public void updateUser(Long userId, String newUsername) {
+        entityManager.createQuery("UPDATE User u SET u.username = :newUsername WHERE u.id = :userId")
+                .setParameter("newUsername", newUsername)
+                .setParameter("userId", userId)
+                .executeUpdate();
+    }
 }
 

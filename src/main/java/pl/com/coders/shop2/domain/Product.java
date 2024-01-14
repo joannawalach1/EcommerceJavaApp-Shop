@@ -28,10 +28,10 @@ public class Product {
     private BigDecimal price;
     private int quantity;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.MERGE)
     private Set<OrderLineItem> orderLineItems;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.MERGE)
     private Set<CartLineItem> cartLineItem;
 
     @CreationTimestamp

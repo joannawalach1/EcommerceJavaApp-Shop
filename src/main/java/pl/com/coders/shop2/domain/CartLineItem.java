@@ -19,9 +19,10 @@ public class CartLineItem {
     private Long id;
 
     @ManyToOne
+    @JoinColumn(name = "cart_id")
     private Cart cart;
 
-    @ManyToOne(cascade = CascadeType.MERGE)
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
     private Product product;
 
     private int cartLineQuantity;

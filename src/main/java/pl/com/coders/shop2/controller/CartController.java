@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.com.coders.shop2.domain.dto.CartDto;
+import pl.com.coders.shop2.exceptions.InsufficientStockException;
 import pl.com.coders.shop2.exceptions.ProductNotFoundException;
 import pl.com.coders.shop2.service.CartService;
 
@@ -21,13 +22,13 @@ public class CartController {
     public ResponseEntity<CartDto> addProductToCart(
             @RequestParam String userEmail,
             @RequestParam String productTitle,
-            @RequestParam int amount) throws ProductNotFoundException {
+            @RequestParam int amount) throws ProductNotFoundException, InsufficientStockException {
         CartDto cart = cartService.addProductToCart(userEmail, productTitle, amount);
         return ResponseEntity.status(HttpStatus.OK).body(cart);
     }
 
     @DeleteMapping("/{cartIndex}/{cartId}")
-    public ResponseEntity<String> deleteCartByIndex( @PathVariable int cartIndex, @PathVariable Long cartId) {
+    public ResponseEntity<String> deleteCartByIndex(@PathVariable int cartIndex, @PathVariable Long cartId) {
         cartService.deleteByIndex(cartId, cartIndex);
         return ResponseEntity.noContent().build();
     }

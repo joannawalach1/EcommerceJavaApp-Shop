@@ -31,7 +31,7 @@ public class Order {
     @ManyToOne
     private User user;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<OrderLineItem> orderLineItems;
 
     @Column(name = "order_status")

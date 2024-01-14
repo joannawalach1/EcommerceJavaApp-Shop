@@ -7,7 +7,6 @@ import pl.com.coders.shop2.domain.dto.OrderDto;
 import pl.com.coders.shop2.service.OrderService;
 
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 @RestController
