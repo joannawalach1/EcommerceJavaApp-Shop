@@ -90,17 +90,20 @@ public class CartRepository {
     }
 
 
-    public List<CartLineItem> getCartLineItemsByCartId(long cartId) {
+    public List<CartLineItem> getCartLineItemsByCartId(Long cartId) {
         return entityManager.createQuery("SELECT c FROM CartLineItem c WHERE c.cart.id = :cartId", CartLineItem.class)
                 .setParameter("cartId", cartId)
                 .getResultList();
     }
 
-    public void deleteCart(Long cartId) {
-            Query deleteQuery = entityManager.createQuery("DELETE FROM Cart c WHERE c.id = :cartId");
-            deleteQuery.setParameter("cartId", cartId);
-            deleteQuery.executeUpdate();
-        }
+    @Transactional
+    public void deleteCartAndItems(Long cartId) {
+        entityManager.createQuery("DELETE FROM Cart c WHERE c.id = :cartId AND c.totalPrice = :zero")
+                .setParameter("cartId", cartId)
+                .setParameter("zero", BigDecimal.ZERO)
+                .executeUpdate();
+    }
+
 
     public Cart getCartByCartId(Long cartId) {
         return entityManager.find(Cart.class, cartId);
@@ -111,6 +114,15 @@ public class CartRepository {
                 .map(CartLineItem::getCartLinePrice)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
+
+    @Transactional
+    public void deleteCartLineItemsByCartId(Long cartId) {
+        Query deleteQuery = entityManager.createQuery("DELETE FROM CartLineItem cli WHERE cli.cart.id = :cartId");
+        deleteQuery.setParameter("cartId", cartId);
+        deleteQuery.executeUpdate();
+    }
+
 }
+
 
 

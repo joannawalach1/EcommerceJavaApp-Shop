@@ -32,7 +32,7 @@ public class Order {
     private User user;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private Set<OrderLineItem> orderLineItems;
+    private Set<OrderLineItem> orderLineItems = new HashSet<>();
 
     @Column(name = "order_status")
     private String status;

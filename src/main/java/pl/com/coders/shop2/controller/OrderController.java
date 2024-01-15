@@ -21,7 +21,7 @@ public class OrderController {
 
     @PostMapping("saveOrder/{userEmail}/{cartId}")
     public ResponseEntity<OrderDto> saveOrder(@PathVariable String userEmail, @PathVariable Long cartId) {
-        OrderDto createdOrder = orderService.saveOrder(userEmail, cartId);
+        OrderDto createdOrder = orderService.createOrderFromCart(userEmail, cartId);
         return ResponseEntity.status(HttpStatus.OK).body(createdOrder);
     }
 

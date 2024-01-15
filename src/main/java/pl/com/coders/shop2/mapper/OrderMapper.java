@@ -4,9 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
-import pl.com.coders.shop2.domain.Order;
-import pl.com.coders.shop2.domain.OrderLineItem;
-import pl.com.coders.shop2.domain.User;
+import pl.com.coders.shop2.domain.*;
 import pl.com.coders.shop2.domain.dto.OrderDto;
 import pl.com.coders.shop2.domain.dto.OrderLineItemDto;
 
@@ -55,4 +53,8 @@ public interface OrderMapper {
     OrderLineItemDto mapOrderLineItem(OrderLineItem orderLineItem);
 
     List<OrderDto> ordersToDtos(List<Order> allOrders);
+
+
+
+    List<OrderDto> ordersToDto(List<Order> allOrders);
 }

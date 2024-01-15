@@ -85,7 +85,7 @@ public class CartService {
             });
 
             if (cart.getCartLineItems().isEmpty() && cart.getTotalPrice().compareTo(BigDecimal.ZERO) == 0) {
-                cartRepository.deleteCart(cartId);
+                cartRepository.deleteCartAndItems(cartId);
             }
         }
     }

@@ -10,8 +10,9 @@ import pl.com.coders.shop2.repository.CartRepository;
 import pl.com.coders.shop2.repository.OrderRepository;
 import pl.com.coders.shop2.repository.UserRepository;
 
-import java.time.LocalDateTime;
-import java.util.*;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -22,39 +23,22 @@ public class OrderService {
     private final CartRepository cartRepository;
 
     @Transactional
-    public OrderDto saveOrder(String userEmail, Long cartId) {
-        User user = userRepository.findByEmail(userEmail);
-        Cart cart = cartRepository.getCartByCartId(cartId);
-        if (user != null) {
-            Order order = new Order();
-            order.setId(UUID.randomUUID());
-            order.setUser(user);
-            order.setTotalAmount(cart.getTotalPrice());
-            order.setStatus("nowy");
-            order.setOrderLineItems(new HashSet<>());
-            order.setCreated(LocalDateTime.now());
-            order.setUpdated(LocalDateTime.now());
+    public OrderDto createOrderFromCart(String userEmail, Long cartId) {
+        Cart userCart = cartRepository.getCartForUser(userEmail);
+        Order order = orderRepository.createOrder(userCart);
+        for (CartLineItem cartLineItem : userCart.getCartLineItems()) {
+            Product product = cartLineItem.getProduct();
+            int quantity = cartLineItem.getCartLineQuantity();
+            OrderLineItem orderLineItem = orderRepository.createOrderLineItem(order, product, quantity);
+            order.addOrderLineItems(orderLineItem);
 
-            List<CartLineItem> cartsItems = cartRepository.getCartLineItemsByCartId(cartId);
-            Set<OrderLineItem> orderLineItems = new HashSet<>();
-
-            for (CartLineItem cartLineItem : cartsItems) {
-                OrderLineItem orderLineItem = new OrderLineItem();
-                orderLineItem.setProduct(cartLineItem.getProduct());
-                orderLineItem.setPrice(cartLineItem.getCartLinePrice());
-                orderLineItem.setQuantity(cartLineItem.getCartLineQuantity());
-                order.addOrderLineItems(orderLineItem);
-
-                order.addOrderLineItems(orderLineItem);
-            }
-            orderRepository.createOrder(order);
-           // cartRepository.deleteCartAndItems(cartId, cart);
-
-            return orderMapper.orderToDto(order);
-        } else {
-            throw new RuntimeException("Nie można znaleźć użytkownika o nazwisku: ");
         }
+        userCart.getCartLineItems().clear();
+        cartRepository.updateCart(userCart);
+        cartRepository.deleteCartAndItems(userCart.getId());
+        return orderMapper.orderToDto(order);
     }
+
 
     public boolean delete(UUID orderId) {
         return orderRepository.delete(orderId);
@@ -62,7 +46,7 @@ public class OrderService {
 
     public List<OrderDto> findAllOrders() {
         List<Order> allOrders = orderRepository.findAllOrders();
-        return orderMapper.ordersToDtos(allOrders);
+        return orderMapper.ordersToDto(allOrders);
     }
 }
 
