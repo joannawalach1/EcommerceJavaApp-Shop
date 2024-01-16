@@ -1,18 +1,29 @@
 package pl.com.coders.shop2.controller;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import pl.com.coders.shop2.domain.User;
+import org.springframework.web.bind.annotation.*;
+import pl.com.coders.shop2.domain.dto.UserDto;
+import pl.com.coders.shop2.service.UserService;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api")
 public class AuthController {
 
-    @GetMapping
-    public User auth() {
-        String login = SecurityContextHolder.getContext().getAuthentication().getName();
-        return new User(login);
+    private final UserService userService;
+
+    public AuthController(UserService userService) {
+        this.userService = userService;
+    }
+
+    @GetMapping("/user")
+    public ResponseEntity<UserDto> getUserDetails() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        System.out.println("Authentication: " + authentication);
+
+        String email = authentication.getName();
+        UserDto user = userService.findByEmail(email);
+        return ResponseEntity.ok(user);
     }
 }
