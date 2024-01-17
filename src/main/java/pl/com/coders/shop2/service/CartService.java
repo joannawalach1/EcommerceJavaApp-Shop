@@ -1,6 +1,7 @@
 package pl.com.coders.shop2.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import pl.com.coders.shop2.domain.Cart;
 import pl.com.coders.shop2.domain.CartLineItem;
@@ -9,6 +10,7 @@ import pl.com.coders.shop2.domain.User;
 import pl.com.coders.shop2.domain.dto.CartDto;
 import pl.com.coders.shop2.exceptions.ProductNotFoundException;
 import pl.com.coders.shop2.mapper.CartMapper;
+import pl.com.coders.shop2.mapper.UserMapper;
 import pl.com.coders.shop2.repository.CartRepository;
 import pl.com.coders.shop2.repository.ProductRepository;
 import pl.com.coders.shop2.repository.UserRepository;
@@ -26,6 +28,7 @@ public class CartService {
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final CartMapper cartMapper;
+    private UserMapper userMapper;
 
 
     public CartDto addProductToCart(String userEmail, String productTitle, int amount)
@@ -40,7 +43,7 @@ public class CartService {
             if (product.getQuantity() >= amount) {
                 cartRepository.updateCartLineItem(amount, existingCartItem, product);
             }
-            updateAfterAddingItem(userCart, existingCartItem, amount);
+            updateAfterAddingItem(existingCartItem, amount);
             productRepository.update(product, product.getId());
         }
         productRepository.update(product, product.getId());
@@ -90,6 +93,12 @@ public class CartService {
         }
     }
 
+    public CartDto getCartForAuthUser() {
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        Cart cartForUser = cartRepository.getCartForUser(userEmail);
+        return cartMapper.toDto(cartForUser);
+    }
+
     private void updateCartAfterItemRemoval(Cart cart, CartLineItem removedItem) {
         Product product = removedItem.getProduct();
         product.setQuantity(product.getQuantity() + removedItem.getCartLineQuantity());
@@ -98,7 +107,7 @@ public class CartService {
         updateCartIndex(cart, removedItem.getCartIndex());
     }
 
-    private void updateAfterAddingItem(Cart cart, CartLineItem addedItem, int amount) {
+    private void updateAfterAddingItem(CartLineItem addedItem, int amount) {
         if (addedItem != null) {
             Product product = addedItem.getProduct();
             int remainingQuantity = Math.max(product.getQuantity() - amount, 0);
@@ -112,6 +121,7 @@ public class CartService {
                 .filter(item -> item.getCartIndex() > deletedIndex)
                 .forEach(cartItem -> cartItem.setCartIndex(cartItem.getCartIndex() - 1));
     }
+
 }
 
 

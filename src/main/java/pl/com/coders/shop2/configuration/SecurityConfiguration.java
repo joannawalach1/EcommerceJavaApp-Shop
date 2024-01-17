@@ -28,8 +28,10 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         http
+                .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/api/user", "/carts/**", "/orders/**").authenticated()
+                .antMatchers("/api/user").authenticated()
+                .antMatchers("/carts/addProductToCart").permitAll()
                 .anyRequest().permitAll()
                 .and()
                 .httpBasic();

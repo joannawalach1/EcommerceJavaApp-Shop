@@ -1,17 +1,14 @@
 package pl.com.coders.shop2.repository;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import pl.com.coders.shop2.domain.Cart;
-import pl.com.coders.shop2.domain.CartLineItem;
-import pl.com.coders.shop2.domain.Product;
-import pl.com.coders.shop2.domain.User;
+import pl.com.coders.shop2.domain.*;
 import pl.com.coders.shop2.exceptions.UserNotFoundException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -68,7 +65,8 @@ public class CartRepository {
     }
 
     public Cart getCartForUser(String email) {
-        User user = userRepository.findByEmail(email);
+        String authenticatedUser = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(authenticatedUser);
         if (user == null) {
             throw new UserNotFoundException("User not found for email: " + email);
         }
@@ -114,14 +112,6 @@ public class CartRepository {
                 .map(CartLineItem::getCartLinePrice)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
-
-    @Transactional
-    public void deleteCartLineItemsByCartId(Long cartId) {
-        Query deleteQuery = entityManager.createQuery("DELETE FROM CartLineItem cli WHERE cli.cart.id = :cartId");
-        deleteQuery.setParameter("cartId", cartId);
-        deleteQuery.executeUpdate();
-    }
-
 }
 
 
