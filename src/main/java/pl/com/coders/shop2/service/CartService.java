@@ -19,6 +19,8 @@ import javax.transaction.Transactional;
 import java.math.BigDecimal;
 import java.util.Optional;
 
+import static java.lang.System.*;
+
 @Transactional
 @Service
 @RequiredArgsConstructor
@@ -33,6 +35,7 @@ public class CartService {
 
     public CartDto addProductToCart(String userEmail, String productTitle, int amount)
             throws ProductNotFoundException {
+
         User user = userRepository.findByEmail(userEmail);
         Product product = getProduct(productTitle);
         Cart userCart = getOrCreateUserCart(userEmail, user);
@@ -44,7 +47,6 @@ public class CartService {
                 cartRepository.updateCartLineItem(amount, existingCartItem, product);
             }
             updateAfterAddingItem(existingCartItem, amount);
-            productRepository.update(product, product.getId());
         }
         productRepository.update(product, product.getId());
         cartRepository.updateCart(userCart);
@@ -53,7 +55,7 @@ public class CartService {
 
 
     public Cart getOrCreateUserCart(String userEmail, User user) {
-        Cart userCart = cartRepository.getCartForUser(userEmail);
+        Cart userCart = cartRepository.getCartForAuthUser(userEmail);
         if (userCart == null) {
             userCart = cartRepository.createCart(user);
         }
@@ -93,9 +95,9 @@ public class CartService {
         }
     }
 
-    public CartDto getCartForAuthUser() {
+    public CartDto getCartForAuthUser(User user) {
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        Cart cartForUser = cartRepository.getCartForUser(userEmail);
+        Cart cartForUser = cartRepository.getCartForAuthUser(userEmail);
         return cartMapper.toDto(cartForUser);
     }
 

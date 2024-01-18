@@ -5,6 +5,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import pl.com.coders.shop2.domain.*;
+import pl.com.coders.shop2.domain.dto.CartDto;
 import pl.com.coders.shop2.exceptions.UserNotFoundException;
 
 import javax.persistence.EntityManager;
@@ -64,11 +65,11 @@ public class CartRepository {
         return lastCartIndex + 1;
     }
 
-    public Cart getCartForUser(String email) {
+    public Cart getCartForAuthUser(String email) {
         String authenticatedUser = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByEmail(authenticatedUser);
         if (user == null) {
-            throw new UserNotFoundException("User not found for email: " + email);
+            throw new UserNotFoundException("User not found for email: " + authenticatedUser);
         }
         Cart existingCart = entityManager.createQuery("SELECT c FROM Cart c JOIN FETCH c.user WHERE c.user = :user", Cart.class)
                 .setParameter("user", user)
@@ -96,9 +97,15 @@ public class CartRepository {
 
     @Transactional
     public void deleteCartAndItems(Long cartId) {
-        entityManager.createQuery("DELETE FROM Cart c WHERE c.id = :cartId AND c.totalPrice = :zero")
+        entityManager.createQuery("DELETE FROM CartLineItem cli WHERE cli.cart.id = :cartId")
                 .setParameter("cartId", cartId)
-                .setParameter("zero", BigDecimal.ZERO)
+                .executeUpdate();
+        entityManager.flush();
+        entityManager.createQuery("UPDATE Cart c SET c.totalPrice = 0 WHERE c.id = :cartId")
+                .setParameter("cartId", cartId)
+                .executeUpdate();
+        entityManager.createQuery("DELETE FROM Cart c WHERE c.id = :cartId AND c.totalPrice = 0")
+                .setParameter("cartId", cartId)
                 .executeUpdate();
     }
 

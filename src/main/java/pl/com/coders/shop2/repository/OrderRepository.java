@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 
@@ -30,7 +31,7 @@ public class OrderRepository {
     @Transactional
     public Order createOrder(Cart cart) {
         Order order = new Order();
-        order.setUser(cart.getUser());
+        order.setUser(order.getUser());
         order.setStatus("nowy");
         order.setTotalAmount(cart.getTotalPrice());
         order.setOrderLineItems(new HashSet<>());
@@ -41,12 +42,12 @@ public class OrderRepository {
     }
 
     @Transactional
-    public OrderLineItem createOrderLineItem(Order order, Product product, int quantity) {
+    public OrderLineItem createOrderLineItem(Order order, Optional<Product> product, int quantity) {
         OrderLineItem orderLineItem = new OrderLineItem();
         orderLineItem.setOrder(order);
-        orderLineItem.setProduct(product);
+        orderLineItem.setProduct(product.get());
         orderLineItem.setQuantity(quantity);
-        orderLineItem.setPrice(product.getPrice().multiply(BigDecimal.valueOf(quantity)));
+        orderLineItem.setPrice(product.get().getPrice().multiply(BigDecimal.valueOf(quantity)));
         order.addOrderLineItems(orderLineItem);
         entityManager.persist(orderLineItem);
         return orderLineItem;

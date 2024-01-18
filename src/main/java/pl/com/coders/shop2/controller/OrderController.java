@@ -22,7 +22,12 @@ public class OrderController {
     @PostMapping("saveOrder/{userEmail}/{cartId}")
     public ResponseEntity<OrderDto> saveOrder(@PathVariable String userEmail, @PathVariable Long cartId) {
         OrderDto createdOrder = orderService.createOrderFromCart(userEmail, cartId);
-        return ResponseEntity.status(HttpStatus.OK).body(createdOrder);
+        if (!createdOrder.equals(null)) {
+            return ResponseEntity.status(HttpStatus.OK).body(createdOrder);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
     }
 
     @DeleteMapping("/delete/{id}")

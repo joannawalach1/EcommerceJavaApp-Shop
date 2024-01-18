@@ -20,8 +20,6 @@ public class AuthController {
     @GetMapping("/user")
     public ResponseEntity<UserDto> getUserDetails() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println("Authentication: " + authentication);
-
         String email = authentication.getName();
         UserDto user = userService.findByEmail(email);
         return ResponseEntity.ok(user);

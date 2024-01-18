@@ -30,4 +30,5 @@ public interface CartMapper {
         return user.getFirstName() + " " + user.getLastName();
     }
 
+    Cart toCart(CartDto userCart);
 }

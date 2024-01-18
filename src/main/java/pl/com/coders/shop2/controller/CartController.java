@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import pl.com.coders.shop2.domain.User;
 import pl.com.coders.shop2.domain.dto.CartDto;
 import pl.com.coders.shop2.exceptions.ProductNotFoundException;
 import pl.com.coders.shop2.mapper.CartMapper;
@@ -15,13 +16,10 @@ import pl.com.coders.shop2.service.UserService;
 public class CartController {
 
     private final CartService cartService;
-    private final UserService userService;
-    private final CartMapper cartMapper;
 
-    public CartController(CartService cartService, UserService userService, CartMapper cartMapper) {
+
+    public CartController(CartService cartService) {
         this.cartService = cartService;
-        this.userService = userService;
-        this.cartMapper = cartMapper;
     }
     @PostMapping("/addProductToCart")
     @PreAuthorize("permitAll()")
@@ -40,8 +38,8 @@ public class CartController {
     }
 
     @GetMapping("/getCarts")
-    public ResponseEntity<CartDto> getCartsForAuthUser() {
-        CartDto cartForAuthUser = cartService.getCartForAuthUser();
+    public ResponseEntity<CartDto> getCartsForAuthUser(User user) {
+        CartDto cartForAuthUser = cartService.getCartForAuthUser(user);
         return  ResponseEntity.status(HttpStatus.OK).body(cartForAuthUser);
     }
 
