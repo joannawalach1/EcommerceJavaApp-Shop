@@ -4,13 +4,13 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.UpdateTimestamp;
+import pl.com.coders.shop2.domain.dto.CartLineItemDto;
+import pl.com.coders.shop2.domain.dto.OrderLineItemDto;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Table(name = "orders")
@@ -48,8 +48,7 @@ public class Order {
         orderLineItem.setOrder(this);
     }
 
-    public void setOrderLineItems(Set<OrderLineItem> orderLineItems) {
-        this.orderLineItems = orderLineItems;
+    public void setOrderLineItems(List<CartLineItemDto> cartLineItems) {
         for (OrderLineItem orderLineItem : orderLineItems) {
             orderLineItem.setOrder(this);
         }

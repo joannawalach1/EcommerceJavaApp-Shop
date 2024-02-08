@@ -2,44 +2,40 @@ package pl.com.coders.shop2.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import pl.com.coders.shop2.domain.User;
 import pl.com.coders.shop2.domain.dto.CartDto;
 import pl.com.coders.shop2.exceptions.ProductNotFoundException;
-import pl.com.coders.shop2.mapper.CartMapper;
 import pl.com.coders.shop2.service.CartService;
-import pl.com.coders.shop2.service.UserService;
+
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 
 @RestController
 @RequestMapping("/carts")
+@CrossOrigin(origins = "http://localhost:4200")
 public class CartController {
-
     private final CartService cartService;
-
 
     public CartController(CartService cartService) {
         this.cartService = cartService;
     }
-    @PostMapping("/addProductToCart")
-    @PreAuthorize("permitAll()")
-    public ResponseEntity<CartDto> addProductToCart(
-            @RequestParam String userEmail,
-            @RequestParam String productTitle,
-            @RequestParam int amount) throws ProductNotFoundException {
-        CartDto cartDto = cartService.addProductToCart(userEmail, productTitle, amount);
+
+    @PostMapping("/{productTitle}/{amount}/addProductToCart")
+    public ResponseEntity<CartDto> addProductToCart(@PathVariable String productTitle,@PathVariable int amount) throws ProductNotFoundException {
+        productTitle = URLDecoder.decode(productTitle, StandardCharsets.UTF_8);
+        CartDto cartDto = cartService.addProductToCart(productTitle, amount);
         return ResponseEntity.status(HttpStatus.OK).body(cartDto);
     }
 
-    @DeleteMapping("/{cartIndex}/{cartId}")
-    public ResponseEntity<String> deleteCartByIndex(@PathVariable int cartIndex, @PathVariable Long cartId) {
-        cartService.deleteByIndex(cartId, cartIndex);
-        return ResponseEntity.noContent().build();
+    @DeleteMapping("/{cartIndex}/{id}")
+    public ResponseEntity<String> deleteCartByIndex(@PathVariable int cartIndex, @PathVariable Long id) {
+        cartService.deleteByIndex(id, cartIndex);
+        return ResponseEntity.status(HttpStatus.OK).body("Cart was deleted");
     }
 
-    @GetMapping("/getCarts")
-    public ResponseEntity<CartDto> getCartsForAuthUser(User user) {
-        CartDto cartForAuthUser = cartService.getCartForAuthUser(user);
+    @GetMapping("/getByEmail/{userEmail}")
+    public ResponseEntity<CartDto> getCartsForAuthUser(@PathVariable String userEmail) {
+        CartDto cartForAuthUser = cartService.getCartForAuthUser(userEmail);
         return  ResponseEntity.status(HttpStatus.OK).body(cartForAuthUser);
     }
 

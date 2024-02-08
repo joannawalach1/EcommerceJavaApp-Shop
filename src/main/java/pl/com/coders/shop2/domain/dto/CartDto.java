@@ -14,6 +14,7 @@ import java.util.List;
 @Builder
 @ToString
 public class CartDto {
+    private Long id;
     private String userName;
     private BigDecimal totalPrice;
     @CreationTimestamp

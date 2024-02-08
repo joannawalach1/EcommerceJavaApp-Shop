@@ -11,35 +11,33 @@ import javax.persistence.TypedQuery;
 @Repository
 public class UserRepository {
     @PersistenceContext
-    private EntityManager entityManager;
+    private final EntityManager entityManager;
+
+    public UserRepository(EntityManager entityManager) {
+        this.entityManager = entityManager;
+    }
 
     @Transactional
     public User create(User user) {
-        return entityManager.merge(user);
+        entityManager.merge(user);
+        return user;
+    }
+
+
+    @Transactional
+    public User findByEmail(String userEmail) {
+        TypedQuery<User> query = entityManager.createQuery(
+                "SELECT u FROM User u WHERE u.email = :userEmail", User.class);
+        query.setParameter("userEmail", userEmail);
+        return query.getResultStream().findFirst().orElse(null);
     }
 
     @Transactional
-    public User findByEmail(String email) {
-        TypedQuery<User> query = entityManager.createQuery(
-                "SELECT u FROM User u WHERE u.email = :email", User.class);
-        query.setParameter("email", email);
-        return query.getSingleResult();
-
-    }
-
-
     public User findById(Long userId) {
         TypedQuery<User> query = entityManager.createQuery(
                 "SELECT u FROM User u WHERE u.id = :userId", User.class);
         query.setParameter("userId", userId);
-        return query.getSingleResult();
-    }
-
-    public User findByLastName(String userLastName) {
-        TypedQuery<User> query = entityManager.createQuery(
-                "SELECT u FROM User u WHERE u.lastName = :userLastName", User.class);
-        query.setParameter("userLastName", userLastName);
-        return query.getSingleResult();
+        return query.getResultStream().findFirst().orElse(null);
     }
 
     @Transactional

@@ -6,11 +6,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.com.coders.shop2.domain.Order;
 import pl.com.coders.shop2.domain.OrderLineItem;
-import pl.com.coders.shop2.domain.Product;
 import pl.com.coders.shop2.domain.User;
 import pl.com.coders.shop2.domain.dto.CartDto;
 import pl.com.coders.shop2.domain.dto.CartLineItemDto;
 import pl.com.coders.shop2.domain.dto.OrderDto;
+import pl.com.coders.shop2.exceptions.EmptyCartException;
 import pl.com.coders.shop2.exceptions.UserNotFoundException;
 import pl.com.coders.shop2.mapper.CartMapper;
 import pl.com.coders.shop2.mapper.OrderMapper;
@@ -19,8 +19,8 @@ import pl.com.coders.shop2.repository.OrderRepository;
 import pl.com.coders.shop2.repository.ProductRepository;
 import pl.com.coders.shop2.repository.UserRepository;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -35,34 +35,37 @@ public class OrderService {
     private final ProductRepository productRepository;
 
     @Transactional
-    public OrderDto createOrderFromCart(String userEmail, Long cartId) {
-        String user = SecurityContextHolder.getContext().getAuthentication().getName();
-        User loggedUser = userRepository.findByEmail(user);
-        if (!userEmail.equals(loggedUser.getEmail())) {
+    public OrderDto createOrderFromCart(String userEmail) {
+        String loggedUser = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(loggedUser);
+        if (!userEmail.equals(loggedUser)) {
             throw new UserNotFoundException("Podany email nie jest zalogowanym użytkownikiem.");
         }
         CartDto cartForAuthUser = cartService.getCartForAuthUser(loggedUser);
-        Order order = orderRepository.createOrder(cartMapper.toCart(cartForAuthUser));
-        order.setUser(loggedUser);
-        for (CartLineItemDto cartLineItemDto : cartForAuthUser.getCartLineItems()) {
-            Optional<Product> productToCart = productRepository.getProductByName(cartLineItemDto.getProductTitle());
-            if (productToCart.isPresent()) {
-                int quantity = cartLineItemDto.getCartLineQuantity();
-                OrderLineItem orderLineItem = orderRepository.createOrderLineItem(order, productToCart, quantity);
-                order.addOrderLineItems(orderLineItem);
-            }
-        }
-        cartRepository.deleteCartAndItems(loggedUser.getId());
+        Order order = orderRepository.createOrderFromCart(cartMapper.toCart(cartForAuthUser));
+        order.setUser(user);
+        List<OrderLineItem> orderLineItems = new ArrayList<>();
+        createOrderLineItems(cartForAuthUser, order, orderLineItems);
+        cartRepository.deleteCartAndItems(cartForAuthUser.getId());
         return orderMapper.orderToDto(order);
+    }
+
+    public List<OrderLineItem> createOrderLineItems(CartDto cartForAuthUser, Order order, List<OrderLineItem> orderLineItems) {
+        for (CartLineItemDto dto : cartForAuthUser.getCartLineItems()) {
+            OrderLineItem orderLineItem = orderRepository.createOrderLineItem(order,
+                    productRepository.getProductByName(dto.getProductTitle()), dto.getCartLineQuantity());
+            orderLineItems.add(orderLineItem);
+        }
+        return orderLineItems;
     }
 
     public boolean delete(UUID orderId) {
         return orderRepository.delete(orderId);
     }
 
-    public List<OrderDto> findAllOrders() {
-        List<Order> allOrders = orderRepository.findAllOrders();
-        return orderMapper.ordersToDto(allOrders);
+    public OrderDto getOrdersByUser(String userEmail) throws EmptyCartException {
+        Order userOrder = orderRepository.getOrdersByUser(userEmail);
+        return orderMapper.orderToDto(userOrder);
     }
 }
 

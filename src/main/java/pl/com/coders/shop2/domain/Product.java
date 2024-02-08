@@ -48,6 +48,9 @@ public class Product {
         this.quantity = quantity;
     }
 
+    public Product(String s, String s1, BigDecimal bigDecimal, int i) {
+    }
+
     @Override
     public String toString() {
         return "Product{id=" + id + "category" + category + "'name='" + name + ", description=" + description + ", price=" + price + ", quantity=" + quantity + ", created=" + created + ", updated=" + updated + "}";

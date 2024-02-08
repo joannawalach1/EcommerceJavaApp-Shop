@@ -4,16 +4,17 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import pl.com.coders.shop2.domain.*;
-import pl.com.coders.shop2.domain.dto.CartDto;
+import pl.com.coders.shop2.domain.Cart;
+import pl.com.coders.shop2.domain.CartLineItem;
+import pl.com.coders.shop2.domain.Product;
+import pl.com.coders.shop2.domain.User;
 import pl.com.coders.shop2.exceptions.UserNotFoundException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Objects;
 
 @Transactional
 @Repository
@@ -23,21 +24,6 @@ public class CartRepository {
     @PersistenceContext
     private final EntityManager entityManager;
     private final UserRepository userRepository;
-
-    public Cart createCart(User user) {
-        Cart newCart = new Cart();
-        newCart.setUser(user);
-        newCart.setCartLineItems(new ArrayList<>());
-        newCart.setTotalPrice(calculateCartTotalPrice(newCart));
-        entityManager.persist(newCart);
-        return newCart;
-    }
-
-    public Cart updateCart(Cart userCart) {
-        userCart.setTotalPrice(calculateCartTotalPrice(userCart));
-        entityManager.merge(userCart);
-        return userCart;
-    }
 
     public CartLineItem createCartLineItem(int amount, Cart cart, Product product) {
         CartLineItem cartLineItem = new CartLineItem();
@@ -60,6 +46,22 @@ public class CartRepository {
         return existingCartItem;
     }
 
+    public Cart createCart(User user) {
+        Cart newCart = new Cart();
+        newCart.setUser(user);
+        newCart.setCartLineItems(new HashSet<>());
+        newCart.setTotalPrice(calculateCartTotalPrice(newCart));
+        entityManager.persist(newCart);
+        return newCart;
+    }
+
+    public Cart updateCart(Cart userCart) {
+        userCart.setTotalPrice(calculateCartTotalPrice(userCart));
+        entityManager.merge(userCart);
+        return userCart;
+    }
+
+
     public int generateCartIndex(Cart cart) {
         Integer lastCartIndex = cart.getCartLineItems().size();
         return lastCartIndex + 1;
@@ -81,22 +83,7 @@ public class CartRepository {
         return existingCart;
     }
 
-    public CartLineItem getCartLineItemByIndex(Long cartIndex) {
-        TypedQuery<CartLineItem> query = entityManager.createQuery(
-                "SELECT cli FROM CartLineItem cli WHERE cli.cartIndex = :cartIndex", CartLineItem.class);
-        query.setParameter("cartIndex", cartIndex);
-        return query.getSingleResult();
-    }
-
-
-    public List<CartLineItem> getCartLineItemsByCartId(Long cartId) {
-        return entityManager.createQuery("SELECT c FROM CartLineItem c WHERE c.cart.id = :cartId", CartLineItem.class)
-                .setParameter("cartId", cartId)
-                .getResultList();
-    }
-
-    @Transactional
-    public void deleteCartAndItems(Long cartId) {
+    public boolean deleteCartAndItems(Long cartId) {
         entityManager.createQuery("DELETE FROM CartLineItem cli WHERE cli.cart.id = :cartId")
                 .setParameter("cartId", cartId)
                 .executeUpdate();
@@ -107,6 +94,7 @@ public class CartRepository {
         entityManager.createQuery("DELETE FROM Cart c WHERE c.id = :cartId AND c.totalPrice = 0")
                 .setParameter("cartId", cartId)
                 .executeUpdate();
+        return true;
     }
 
 
@@ -115,11 +103,18 @@ public class CartRepository {
     }
 
     public BigDecimal calculateCartTotalPrice(Cart userCart) {
+        if (userCart == null || userCart.getCartLineItems() == null) {
+            return BigDecimal.ZERO;
+        }
+
         return userCart.getCartLineItems().stream()
+                .filter(Objects::nonNull)
                 .map(CartLineItem::getCartLinePrice)
+                .filter(Objects::nonNull)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }
+
 
 
 

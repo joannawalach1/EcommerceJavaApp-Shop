@@ -4,35 +4,32 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import pl.com.coders.shop2.domain.Cart;
+import pl.com.coders.shop2.domain.dto.CartDto;
 import pl.com.coders.shop2.domain.dto.OrderDto;
-import pl.com.coders.shop2.exceptions.EmptyCartException;
-import pl.com.coders.shop2.service.OrderService;
+import pl.com.coders.shop2.domain.dto.ProductDto;
+import pl.com.coders.shop2.domain.dto.UserDto;
+import pl.com.coders.shop2.exceptions.ProductNotFoundException;
+import pl.com.coders.shop2.service.CartService;
 
-import java.math.BigDecimal;
 import java.util.Base64;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+import static org.mockito.internal.verification.VerificationModeFactory.times;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -40,70 +37,76 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
-class OrderControllerTest {
+
+class CartControllerTest {
     @Autowired
     private MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
     @MockBean
-    private OrderService orderService;
+    private CartService cartService;
 
-    private OrderDto orderDto;
+    private CartDto cartDto;
+    private Cart cart;
     private String userEmail;
+    private String productTitle;
+    private int amount;
 
     @BeforeEach
     void setUp() {
-        orderDto = new OrderDto();
-        orderDto.setUserLastName("Doe");
-        orderDto.setTotalAmount(BigDecimal.valueOf(100.0));
+        cartDto = new CartDto();
+        cartDto.setUserName("Doe");
+        amount = 20;
+        productTitle = "Product 2";
         userEmail = "john@example.com";
-
-        Authentication authentication = new UsernamePasswordAuthenticationToken(userEmail, "pass1");
-        SecurityContext securityContext = SecurityContextHolder.getContext();
-        securityContext.setAuthentication(authentication);
     }
 
     @Test
-    void saveOrder() throws Exception {
-        when(orderService.createOrderFromCart(userEmail)).thenReturn(orderDto);
-
-        mockMvc.perform(MockMvcRequestBuilders
-                        .post("/orders/saveOrder/{userEmail}", userEmail)
+    void addProductToCart() throws ProductNotFoundException, Exception {
+        when(cartService.addProductToCart(productTitle, amount)).thenReturn(cartDto);
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders
+                        .post("/carts/{productTitle}/{amount}/addProductToCart", productTitle, amount)
                         .header(HttpHeaders.AUTHORIZATION, "Basic " + base64("john@example.com:pass1"))
-                .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andReturn();
-
-        verify(orderService, times(1)).createOrderFromCart(any());
+        String responseContent = result.getResponse().getContentAsString();
+        CartDto responseCart = objectMapper.readValue(responseContent, CartDto.class);
+        assertEquals(cartDto.getUserName(), responseCart.getUserName());
+        verify(cartService, times(1)).addProductToCart(productTitle,amount);
     }
 
     @Test
-    void delete() throws Exception {
+    void deleteCartByIndex() throws Exception {
         // Given
-        UUID orderId = UUID.fromString("8ee0c4f6-1b02-4a80-bf8b-ba70f5d9f49d");
-        when(orderService.delete(orderId)).thenReturn(true);
+        int cartIndex = 1;
+        Long cartId = 302L;
+        Mockito.when(cartService.deleteByIndex(cartId, cartIndex)).thenReturn(true);
 
         // When
         mockMvc.perform(MockMvcRequestBuilders
-                        .delete("/orders/delete/{orderId}", orderId)
+                        .delete("/carts/{cartIndex}/{cartId}", cartIndex, cartId)
                         .header(HttpHeaders.AUTHORIZATION, "Basic " + base64("john@example.com:pass1"))
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNoContent());
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
 
         // Then
-        verify(orderService, times(1)).delete(orderId);
+        verify(cartService, times(1)).deleteByIndex(cartId, cartIndex);
     }
 
     @Test
-    void getOrdersByUser() throws EmptyCartException, Exception {
+    void getCartsForAuthUser() throws Exception {
         // Given
-        when(orderService.getOrdersByUser(userEmail)).thenReturn(orderDto);
+        when(cartService.getCartForAuthUser(userEmail)).thenReturn(cartDto);
 
         // When
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders
-                        .get("/orders/byUser/{userEmail}", userEmail)
-                        .header(HttpHeaders.AUTHORIZATION, "Basic " + base64("john@example.com:pass1")))
+                        .get("/carts/getByEmail/{userEmail}", userEmail)
+                        .header(HttpHeaders.AUTHORIZATION, "Basic " + base64("john@example.com:pass1"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(cartDto))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andReturn();
@@ -111,8 +114,7 @@ class OrderControllerTest {
         // Then
         String jsonResponse = result.getResponse().getContentAsString();
         if (!jsonResponse.isEmpty()) {
-            OrderDto responseOrder = objectMapper.readValue(jsonResponse, OrderDto.class);
-            assertEquals(orderDto.getUserLastName(), responseOrder.getUserLastName());
+            CartDto responseCart = objectMapper.readValue(jsonResponse, CartDto.class);
         }
         assertNotNull(result.getResponse().getContentType());
     }

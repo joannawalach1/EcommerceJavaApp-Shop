@@ -7,8 +7,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "carts")
@@ -28,11 +28,14 @@ public class Cart {
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private List<CartLineItem> cartLineItems = new ArrayList<>();
+    private Set<CartLineItem> cartLineItems =  new HashSet<>();
     @CreationTimestamp
     private LocalDateTime created;
     @UpdateTimestamp
     private LocalDateTime updated;
+
+    public Cart(int i, BigDecimal ten, User user, LocalDateTime now, LocalDateTime now1) {
+    }
 
     public void addCartLineItem(CartLineItem cartLineItem) {
             cartLineItems.add(cartLineItem);

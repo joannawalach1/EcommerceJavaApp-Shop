@@ -17,9 +17,8 @@ import pl.com.coders.shop2.repository.UserRepository;
 
 import javax.transaction.Transactional;
 import java.math.BigDecimal;
+import java.util.Objects;
 import java.util.Optional;
-
-import static java.lang.System.*;
 
 @Transactional
 @Service
@@ -30,15 +29,14 @@ public class CartService {
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final CartMapper cartMapper;
-    private UserMapper userMapper;
+    private final UserMapper userMapper;
 
-
-    public CartDto addProductToCart(String userEmail, String productTitle, int amount)
+    public CartDto addProductToCart(String productTitle, int amount)
             throws ProductNotFoundException {
-
-        User user = userRepository.findByEmail(userEmail);
+        String loggedUser = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(loggedUser);
         Product product = getProduct(productTitle);
-        Cart userCart = getOrCreateUserCart(userEmail, user);
+        Cart userCart = getOrCreateUserCart(loggedUser);
         CartLineItem existingCartItem = findCartItem(userCart, product);
         if (existingCartItem == null) {
             cartRepository.createCartLineItem(amount, userCart, product);
@@ -54,30 +52,32 @@ public class CartService {
     }
 
 
-    public Cart getOrCreateUserCart(String userEmail, User user) {
+    public Cart getOrCreateUserCart(String userEmail) {
         Cart userCart = cartRepository.getCartForAuthUser(userEmail);
         if (userCart == null) {
-            userCart = cartRepository.createCart(user);
+            userCart = cartRepository.createCart(new User());
         }
         return userCart;
     }
 
     private Product getProduct(String productTitle) throws ProductNotFoundException {
-        return productRepository.getProductByName(productTitle)
-                .orElseThrow(() -> new ProductNotFoundException("Product not found: " + productTitle));
+        return productRepository.getProductByName(productTitle);
     }
 
     private CartLineItem findCartItem(Cart cart, Product product) {
-        return cart.getCartLineItems().stream()
-                .filter(cli -> cli.getProduct().getName().equals(product.getName()))
-                .findFirst()
-                .orElse(null);
+        if (cart != null && cart.getCartLineItems() != null) {
+            return cart.getCartLineItems().stream()
+                    .filter(cli -> Objects.equals(cli.getProduct().getId(), product.getId()))
+                    .findFirst()
+                    .orElse(null);
+        }
+        return null;
     }
 
-    public void deleteByIndex(long cartId, int cartIndex) {
+    public boolean deleteByIndex(Long cartId, int cartIndex) {
         Cart cart = cartRepository.getCartByCartId(cartId);
 
-        if (cart != null) {
+        if (cart != null && cart.getCartLineItems() != null) {
             Optional<CartLineItem> cartLineItemOptional = cart.getCartLineItems().stream()
                     .filter(item -> item.getCartIndex() == cartIndex)
                     .findFirst();
@@ -89,14 +89,17 @@ public class CartService {
                 cartRepository.updateCart(cart);
             });
 
-            if (cart.getCartLineItems().isEmpty() && cart.getTotalPrice().compareTo(BigDecimal.ZERO) == 0) {
+            if (cart != null
+                    && (cart.getCartLineItems() == null || cart.getCartLineItems().isEmpty())
+                    && (cart.getTotalPrice() == null || cart.getTotalPrice().compareTo(BigDecimal.ZERO) == 0)) {
                 cartRepository.deleteCartAndItems(cartId);
             }
         }
+        return false;
     }
 
-    public CartDto getCartForAuthUser(User user) {
-        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+    public CartDto getCartForAuthUser(String userEmail) {
+        userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         Cart cartForUser = cartRepository.getCartForAuthUser(userEmail);
         return cartMapper.toDto(cartForUser);
     }
@@ -117,13 +120,11 @@ public class CartService {
         }
     }
 
-
     private void updateCartIndex(Cart cart, int deletedIndex) {
         cart.getCartLineItems().stream()
                 .filter(item -> item.getCartIndex() > deletedIndex)
                 .forEach(cartItem -> cartItem.setCartIndex(cartItem.getCartIndex() - 1));
     }
-
 }
 
 

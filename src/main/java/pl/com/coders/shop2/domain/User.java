@@ -6,16 +6,15 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
 @Table(name = "users")
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
-@Builder
-
+@NoArgsConstructor
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,7 +24,7 @@ public class User {
     private String lastName;
     private String password;
     @OneToMany(mappedBy = "user")
-    private Set<Order> orders;
+    private Set<Order> orders = new HashSet<>();
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private Cart cart;
     @CreationTimestamp
@@ -33,9 +32,6 @@ public class User {
     @UpdateTimestamp
     private LocalDateTime updated;
 
-    public User(long id, String mail, String first_name, String last_name, String password) {
-    }
-
-    public User(String login) {
+    public User(String email, String firstName, String lastName, String password) {
     }
 }

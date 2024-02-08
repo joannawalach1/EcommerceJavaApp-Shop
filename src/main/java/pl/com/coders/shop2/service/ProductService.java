@@ -1,6 +1,6 @@
 package pl.com.coders.shop2.service;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import pl.com.coders.shop2.domain.Category;
 import pl.com.coders.shop2.domain.CategoryType;
@@ -12,10 +12,8 @@ import pl.com.coders.shop2.repository.ProductRepository;
 
 import java.util.List;
 
-import static java.lang.System.*;
-
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ProductService {
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
@@ -23,7 +21,6 @@ public class ProductService {
 
     public ProductDto create(ProductDto productDto) {
         Long categoryId = productDto.getCategoryType().getId();
-        out.println("Category ID: " + categoryId);
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new IllegalArgumentException("Category not found with ID: " + categoryId));
 
@@ -34,8 +31,12 @@ public class ProductService {
         return productMapper.productToDto(savedProduct);
     }
 
-    public ProductDto get(Long id) {
+    public ProductDto getById(Long id) {
         return productMapper.productToDto(productRepository.getProductById(id));
+    }
+
+    public ProductDto getByName(String name) {
+        return productMapper.productToDto(productRepository.getProductByName(name));
     }
 
     public boolean delete(Long id) {

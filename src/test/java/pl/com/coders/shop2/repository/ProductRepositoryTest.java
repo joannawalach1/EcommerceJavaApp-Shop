@@ -89,7 +89,6 @@ class ProductRepositoryTest {
     @Test
     void getProductById_WithNonExistingId_ShouldThrowException() {
         Long nonExistingId = 1200L;
-
         ProductWithGivenIdNotExistsException exception = assertThrows(ProductWithGivenIdNotExistsException.class, () -> {
             productRepository.getProductById(nonExistingId);
         });

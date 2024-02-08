@@ -4,13 +4,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.com.coders.shop2.domain.dto.OrderDto;
+import pl.com.coders.shop2.exceptions.EmptyCartException;
 import pl.com.coders.shop2.service.OrderService;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/orders")
+@CrossOrigin(origins = "http://localhost:4200")
 public class OrderController {
 
     private final OrderService orderService;
@@ -19,15 +20,14 @@ public class OrderController {
         this.orderService = orderService;
     }
 
-    @PostMapping("saveOrder/{userEmail}/{cartId}")
-    public ResponseEntity<OrderDto> saveOrder(@PathVariable String userEmail, @PathVariable Long cartId) {
-        OrderDto createdOrder = orderService.createOrderFromCart(userEmail, cartId);
+    @PostMapping("saveOrder/{userEmail}")
+    public ResponseEntity<OrderDto> saveOrder(@PathVariable String userEmail){
+        OrderDto createdOrder = orderService.createOrderFromCart(userEmail);
         if (!createdOrder.equals(null)) {
             return ResponseEntity.status(HttpStatus.OK).body(createdOrder);
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
-
     }
 
     @DeleteMapping("/delete/{id}")
@@ -36,9 +36,9 @@ public class OrderController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/getOrder")
-    public ResponseEntity<List<OrderDto>> findAllOrders() {
-        List<OrderDto> allOrders = orderService.findAllOrders();
-        return ResponseEntity.status(HttpStatus.OK).body(allOrders);
+    @GetMapping("/byUser/{userEmail}")
+    public ResponseEntity<OrderDto> getOrdersByUser(@PathVariable String userEmail) throws EmptyCartException {
+        OrderDto orderByUser = orderService.getOrdersByUser(userEmail);
+        return ResponseEntity.status(HttpStatus.OK).body(orderByUser);
     }
 }

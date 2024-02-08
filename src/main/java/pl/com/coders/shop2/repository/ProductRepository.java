@@ -9,12 +9,8 @@ import pl.com.coders.shop2.exceptions.ProductWithGivenIdNotExistsException;
 import pl.com.coders.shop2.exceptions.ProductWithGivenTitleExistsException;
 import pl.com.coders.shop2.exceptions.ProductWithGivenTitleNotExistsException;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
-import javax.persistence.TypedQuery;
+import javax.persistence.*;
 import java.util.List;
-import java.util.Optional;
 @Repository
 public class ProductRepository {
     @PersistenceContext
@@ -99,11 +95,11 @@ public class ProductRepository {
     }
 
     @Transactional
-    public Optional<Product> getProductByName(String name) {
+    public Product getProductByName(String name) {
         String jpql = "SELECT p FROM Product p WHERE p.name = :name";
         TypedQuery<Product> query = entityManager.createQuery(jpql, Product.class);
         query.setParameter("name", name);
-        List<Product> resultList = query.getResultList();
-        return resultList.isEmpty() ? Optional.empty() : Optional.of(resultList.get(0));
+        return query.getResultList().stream().findFirst().orElseThrow(() -> new EntityNotFoundException("Product not found"));
+
     }
 }
