@@ -69,7 +69,7 @@ mvn liquibase:update
 Copy code
 mvn spring-boot:run
 
-6. **Access the application:
+6. **Access the application:**
 Open your web browser and go to http://localhost:8080 to access the Ecommerce Shop Management System.
 
 These steps ensure that the project is built, dependencies are resolved, the database is set up, and the application is running locally. Customize the database configuration and other properties as needed for your environment.
