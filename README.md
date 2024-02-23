@@ -42,34 +42,33 @@ Ensure you have the following dependencies installed on your development environ
 Follow these steps to set up and run the Ecommerce Shop Management System:
 
 1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/joannawalach1/Ecommerce-ShopManagmentSystem.git
+    ```bash
+    git clone https://github.com/joannawalach1/Ecommerce-ShopManagmentSystem.git
+    ```
 
 2. **Navigate to the project directory:**
-```bash
-Copy code
-cd Ecommerce-ShopManagmentSystem
+    ```bash
+    cd Ecommerce-ShopManagmentSystem
+    ```
 
 3. **Build the project using Maven:**
-```bash
-Copy code
-mvn clean install
+    ```bash
+    mvn clean install
+    ```
 
 4. **Create a PostgreSQL database:**
-```Create a PostgreSQL database named ecommerce_db.
-Update the database configuration in the application.properties file if needed.
-Run Liquibase for database migrations:
+    - Create a PostgreSQL database named `ecommerce_db`.
+    - Update the database configuration in the `application.properties` file if needed.
 
-```bash
-Copy code
-mvn liquibase:update
+5. **Run Liquibase for database migrations:**
+    ```bash
+    mvn liquibase:update
+    ```
 
-5. **Run the application:**
-```bash
-Copy code
-mvn spring-boot:run
+6. **Run the application:**
+    ```bash
+    mvn spring-boot:run
+    ```
 
-6. **Access the application:**
-Open your web browser and go to http://localhost:8080 to access the Ecommerce Shop Management System.
-
-These steps ensure that the project is built, dependencies are resolved, the database is set up, and the application is running locally. Customize the database configuration and other properties as needed for your environment.
+7. **Access the application:**
+    Open your web browser and go to [http://localhost:8080](http://localhost:8080) to access the Ecommerce Shop Management System.
